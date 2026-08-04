@@ -1,7 +1,8 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { getSalt, register, login, logout } from '../controllers/authController.js';
+import { getSalt, register, login, verifyMasterPassword, logout } from '../controllers/authController.js';
 import { registerValidator, loginValidator, saltQueryValidator } from '../validators/authValidator.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ const authLimiter = rateLimit({
 router.get('/salt', authLimiter, saltQueryValidator, getSalt);
 router.post('/register', authLimiter, registerValidator, register);
 router.post('/login', authLimiter, loginValidator, login);
+router.post('/verify', protect, authLimiter, verifyMasterPassword);
 router.post('/logout', logout);
 
 export default router;

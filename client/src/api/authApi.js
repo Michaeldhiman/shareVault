@@ -5,25 +5,31 @@ import axiosClient from './axiosClient';
  */
 export const authApi = {
   /**
-   * Fetches salt for a user email.
+   * Fetches salt for a user email. Anti-enumeration returns deterministic fake salt if not found.
    * @param {string} email
    */
   getSalt: (email) => axiosClient.get(`/auth/salt?email=${encodeURIComponent(email)}`),
 
   /**
-   * Registers a new user.
+   * Registers a new user. Sets HttpOnly session cookie on backend.
    * @param {object} payload - { name, email, authHash, salt }
    */
   register: (payload) => axiosClient.post('/auth/register', payload),
 
   /**
-   * Authenticates user login.
+   * Authenticates user login. Sets HttpOnly session cookie on backend.
    * @param {object} payload - { email, authHash }
    */
   login: (payload) => axiosClient.post('/auth/login', payload),
 
   /**
-   * Logs out user.
+   * Verifies master password authHash without issuing a new token or resetting session cookie.
+   * @param {object} payload - { authHash }
+   */
+  verifyMasterPassword: (payload) => axiosClient.post('/auth/verify', payload),
+
+  /**
+   * Logs out user and clears HttpOnly session cookie.
    */
   logout: () => axiosClient.post('/auth/logout'),
 

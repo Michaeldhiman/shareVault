@@ -17,7 +17,7 @@ export const getUserVaultItems = async (userId) => {
 /**
  * Creates a new encrypted vault entry.
  * @param {string} userId
- * @param {object} vaultData - { website, encryptedUsername, encryptedPassword, encryptedNotes, iv, category, favorite }
+ * @param {object} vaultData - { website, encryptedUsername, usernameIv, encryptedPassword, passwordIv, encryptedNotes, notesIv, iv, category, favorite }
  * @returns {Promise<object>} Created vault document
  */
 export const createVaultItem = async (userId, vaultData) => {
@@ -48,8 +48,11 @@ export const updateVaultItem = async (userId, itemId, updateData) => {
   const allowedUpdates = [
     'website',
     'encryptedUsername',
+    'usernameIv',
     'encryptedPassword',
+    'passwordIv',
     'encryptedNotes',
+    'notesIv',
     'iv',
     'category',
     'favorite',

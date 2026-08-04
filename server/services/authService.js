@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { generateToken } from '../utils/jwtUtils.js';
 
@@ -7,16 +8,32 @@ import { generateToken } from '../utils/jwtUtils.js';
  */
 
 /**
+ * Generates a deterministic, cryptographically stable fake salt for non-existent email addresses.
+ * Uses HMAC-SHA256 with a server secret so identical emails always yield the same fake salt,
+ * while preventing email enumeration / Salt Oracle attacks.
+ * @param {string} email
+ * @returns {string} 32-character hex salt string (16 bytes)
+ */
+export const getDeterministicFakeSalt = (email) => {
+  const secret = process.env.SALT_SECRET || process.env.JWT_SECRET || 'securevault_fallback_salt_secret_key';
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(email.toLowerCase().trim());
+  return hmac.digest('hex').substring(0, 32);
+};
+
+/**
  * Retrieves cryptographic salt for a given email address.
+ * Anti-Enumeration Defense: Returns a deterministic fake salt if email does not exist.
  * @param {string} email
  * @returns {Promise<{salt: string}>}
  */
 export const getUserSaltByEmail = async (email) => {
-  const user = await User.findOne({ email }).select('salt');
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail }).select('salt');
+
   if (!user) {
-    const error = new Error('User not found with this email');
-    error.statusCode = 404;
-    throw error;
+    // Return deterministic fake salt to prevent user email enumeration attacks
+    return { salt: getDeterministicFakeSalt(normalizedEmail) };
   }
   return { salt: user.salt };
 };
@@ -27,8 +44,10 @@ export const getUserSaltByEmail = async (email) => {
  * @returns {Promise<{user: object, token: string}>}
  */
 export const registerUser = async ({ name, email, authHash, salt }) => {
+  const normalizedEmail = email.toLowerCase().trim();
+
   // Check if email already registered
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
     const error = new Error('Email is already registered');
     error.statusCode = 400;
@@ -41,7 +60,7 @@ export const registerUser = async ({ name, email, authHash, salt }) => {
 
   const user = await User.create({
     name,
-    email,
+    email: normalizedEmail,
     authHash: hashedAuthHash,
     salt,
   });
@@ -60,7 +79,8 @@ export const registerUser = async ({ name, email, authHash, salt }) => {
  * @returns {Promise<{user: object, token: string}>}
  */
 export const loginUser = async ({ email, authHash }) => {
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
 
   if (!user) {
     const error = new Error('Invalid email or password');
@@ -83,6 +103,32 @@ export const loginUser = async ({ email, authHash }) => {
     user: user.toJSON(),
     token,
   };
+};
+
+/**
+ * Verifies a user's master password authHash without issuing a new token.
+ * Used during vault unlock to verify master password locally.
+ * @param {string} userId
+ * @param {string} authHash
+ * @returns {Promise<{valid: boolean}>}
+ */
+export const verifyMasterPassword = async (userId, authHash) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error('User account not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isMatch = await bcrypt.compare(authHash, user.authHash);
+
+  if (!isMatch) {
+    const error = new Error('Incorrect Master Password');
+    error.statusCode = 401;
+    throw error;
+  }
+
+  return { valid: true };
 };
 
 /**

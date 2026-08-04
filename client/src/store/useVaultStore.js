@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { vaultApi } from '../api/vaultApi';
-import { encryptText, decryptText, generateIV, bufferToBase64 } from '../crypto/aes';
+import { encryptText, decryptText } from '../crypto/aes';
 
 /**
  * Vault Zustand Store
  * Handles encrypted API requests and transparent client-side field decryption/encryption.
+ * Cryptographic Rule: Every encrypted field gets its OWN unique 12-byte random IV.
  */
 export const useVaultStore = create((set, get) => ({
   items: [],
@@ -30,14 +31,18 @@ export const useVaultStore = create((set, get) => ({
       const response = await vaultApi.getVault();
       const rawItems = response.data || [];
 
-      // Decrypt items locally in browser
+      // Decrypt items locally in browser using per-field IVs
       const decryptedItems = await Promise.all(
         rawItems.map(async (item) => {
           try {
-            const username = await decryptText(item.encryptedUsername, item.iv, encryptionKey);
-            const password = await decryptText(item.encryptedPassword, item.iv, encryptionKey);
+            const usernameIv = item.usernameIv || item.iv;
+            const passwordIv = item.passwordIv || item.iv;
+            const notesIv = item.notesIv || item.iv;
+
+            const username = await decryptText(item.encryptedUsername, usernameIv, encryptionKey);
+            const password = await decryptText(item.encryptedPassword, passwordIv, encryptionKey);
             const notes = item.encryptedNotes
-              ? await decryptText(item.encryptedNotes, item.iv, encryptionKey)
+              ? await decryptText(item.encryptedNotes, notesIv, encryptionKey)
               : '';
 
             return {
@@ -48,6 +53,9 @@ export const useVaultStore = create((set, get) => ({
               notes,
               category: item.category || 'Work',
               favorite: !!item.favorite,
+              usernameIv,
+              passwordIv,
+              notesIv,
               iv: item.iv,
               createdAt: item.createdAt,
               updatedAt: item.updatedAt,
@@ -77,30 +85,29 @@ export const useVaultStore = create((set, get) => ({
   },
 
   /**
-   * Encrypts fields and creates a new vault credential using a shared 12-byte record IV.
+   * Encrypts fields and creates a new vault credential using unique IVs per field.
    */
   addVaultItem: async (formData, encryptionKey) => {
     if (!encryptionKey) return { success: false, message: 'Vault is locked' };
 
     set({ loading: true, error: null });
     try {
-      // 1. Generate one cryptographically secure 12-byte IV shared across all fields in this record
-      const recordIvBytes = generateIV();
-      const recordIvBase64 = bufferToBase64(recordIvBytes);
-
-      // 2. Encrypt fields using the shared record IV
-      const usernameEnc = await encryptText(formData.username, encryptionKey, recordIvBytes);
-      const passwordEnc = await encryptText(formData.password, encryptionKey, recordIvBytes);
+      // Generate a UNIQUE 12-byte IV for every single field independently (prevents stream cipher reuse)
+      const usernameEnc = await encryptText(formData.username, encryptionKey);
+      const passwordEnc = await encryptText(formData.password, encryptionKey);
       const notesEnc = formData.notes
-        ? await encryptText(formData.notes, encryptionKey, recordIvBytes)
-        : { ciphertext: '' };
+        ? await encryptText(formData.notes, encryptionKey)
+        : { ciphertext: '', iv: '' };
 
       const payload = {
         website: formData.website,
         encryptedUsername: usernameEnc.ciphertext,
+        usernameIv: usernameEnc.iv,
         encryptedPassword: passwordEnc.ciphertext,
+        passwordIv: passwordEnc.iv,
         encryptedNotes: notesEnc.ciphertext,
-        iv: recordIvBase64,
+        notesIv: notesEnc.iv,
+        iv: usernameEnc.iv, // legacy fallback
         category: formData.category || 'Work',
         favorite: !!formData.favorite,
       };
@@ -116,6 +123,9 @@ export const useVaultStore = create((set, get) => ({
         notes: formData.notes || '',
         category: newItem.category,
         favorite: newItem.favorite,
+        usernameIv: newItem.usernameIv,
+        passwordIv: newItem.passwordIv,
+        notesIv: newItem.notesIv,
         iv: newItem.iv,
         createdAt: newItem.createdAt,
         updatedAt: newItem.updatedAt,
@@ -134,28 +144,28 @@ export const useVaultStore = create((set, get) => ({
   },
 
   /**
-   * Encrypts fields and updates an existing credential using a shared 12-byte record IV.
+   * Encrypts fields and updates an existing credential using unique IVs per field.
    */
   updateVaultItem: async (id, formData, encryptionKey) => {
     if (!encryptionKey) return { success: false, message: 'Vault is locked' };
 
     set({ loading: true, error: null });
     try {
-      const recordIvBytes = generateIV();
-      const recordIvBase64 = bufferToBase64(recordIvBytes);
-
-      const usernameEnc = await encryptText(formData.username, encryptionKey, recordIvBytes);
-      const passwordEnc = await encryptText(formData.password, encryptionKey, recordIvBytes);
+      const usernameEnc = await encryptText(formData.username, encryptionKey);
+      const passwordEnc = await encryptText(formData.password, encryptionKey);
       const notesEnc = formData.notes
-        ? await encryptText(formData.notes, encryptionKey, recordIvBytes)
-        : { ciphertext: '' };
+        ? await encryptText(formData.notes, encryptionKey)
+        : { ciphertext: '', iv: '' };
 
       const payload = {
         website: formData.website,
         encryptedUsername: usernameEnc.ciphertext,
+        usernameIv: usernameEnc.iv,
         encryptedPassword: passwordEnc.ciphertext,
+        passwordIv: passwordEnc.iv,
         encryptedNotes: notesEnc.ciphertext,
-        iv: recordIvBase64,
+        notesIv: notesEnc.iv,
+        iv: usernameEnc.iv,
         category: formData.category,
         favorite: formData.favorite,
       };
@@ -171,6 +181,9 @@ export const useVaultStore = create((set, get) => ({
         notes: formData.notes || '',
         category: updatedItem.category,
         favorite: updatedItem.favorite,
+        usernameIv: updatedItem.usernameIv,
+        passwordIv: updatedItem.passwordIv,
+        notesIv: updatedItem.notesIv,
         iv: updatedItem.iv,
         createdAt: updatedItem.createdAt,
         updatedAt: updatedItem.updatedAt,

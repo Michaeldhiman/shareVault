@@ -8,6 +8,7 @@ export const VAULT_CATEGORIES = ['Social', 'Shopping', 'Finance', 'Education', '
 /**
  * Vault Schema
  * Stores client-side encrypted credentials.
+ * Cryptographic Rule: Every encrypted field MUST have its own unique random IV.
  * The backend never has access to plaintext username, password, or notes.
  */
 const vaultSchema = new mongoose.Schema(
@@ -27,17 +28,30 @@ const vaultSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Encrypted username is required'],
     },
+    usernameIv: {
+      type: String,
+      default: '',
+    },
     encryptedPassword: {
       type: String,
       required: [true, 'Encrypted password is required'],
+    },
+    passwordIv: {
+      type: String,
+      default: '',
     },
     encryptedNotes: {
       type: String,
       default: '',
     },
+    notesIv: {
+      type: String,
+      default: '',
+    },
+    // Fallback single iv for legacy schema records
     iv: {
       type: String,
-      required: [true, 'Initialization Vector (IV) is required'],
+      default: '',
     },
     category: {
       type: String,

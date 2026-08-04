@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -12,12 +14,34 @@ const app = express();
 // Security HTTP Headers
 app.use(helmet());
 
+// Cookie Parser Middleware for HttpOnly Cookie Authentication
+app.use(cookieParser());
+
+// HTTP Request Logger (Morgan)
+const isProduction = process.env.NODE_ENV === 'production';
+app.use(morgan(isProduction ? 'combined' : 'dev'));
+
 // Cross-Origin Resource Sharing (CORS) Configuration
-const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const rawOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const formattedOrigin = rawOrigin.startsWith('http://') || rawOrigin.startsWith('https://')
+  ? rawOrigin
+  : `https://${rawOrigin}`;
 
 app.use(
   cors({
-    origin: clientOrigin,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, or Postman)
+      if (!origin) return callback(null, true);
+
+      if (
+        origin === formattedOrigin ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('localhost')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, formattedOrigin);
+    },
     credentials: true,
   })
 );

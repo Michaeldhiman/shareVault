@@ -2,29 +2,15 @@ import axios from 'axios';
 
 /**
  * Axios Client Instance
- * Configured with base URL and interceptors for Authorization.
+ * Configured with base URL, withCredentials: true for HttpOnly cookies, and error interceptors.
  */
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  withCredentials: true, // Automatically includes HttpOnly session cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
-/**
- * Request Interceptor
- * Dynamically attaches JWT Authorization header if available.
- */
-axiosClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('securevault_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 /**
  * Response Interceptor

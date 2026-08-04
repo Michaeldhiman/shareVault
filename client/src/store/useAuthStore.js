@@ -4,13 +4,12 @@ import { deriveClientKeys } from '../crypto/keyDerivation';
 
 /**
  * Auth Zustand Store
- * Manages user authentication state and in-memory Vault Encryption Key.
+ * Manages user authentication state via HttpOnly Cookies & in-memory Vault Encryption Key.
  */
 export const useAuthStore = create((set, get) => ({
   user: null,
-  token: localStorage.getItem('securevault_token') || null,
-  encryptionKey: null, // Stored strictly in memory, never persisted
-  isAuthenticated: !!localStorage.getItem('securevault_token'),
+  encryptionKey: null, // Stored strictly in memory, never persisted to disk or localStorage
+  isAuthenticated: false,
   loading: false,
   error: null,
 
@@ -23,16 +22,12 @@ export const useAuthStore = create((set, get) => ({
       // 1. Client-side key derivation via PBKDF2 (100,000 iterations)
       const { authHash, encryptionKey, salt } = await deriveClientKeys(masterPassword);
 
-      // 2. Call register API with authHash and salt only
+      // 2. Call register API with authHash and salt (sets HttpOnly cookie on res)
       const response = await authApi.register({ name, email, authHash, salt });
-      const { user, token } = response.data;
-
-      // 3. Save JWT token in localStorage and encryptionKey in memory
-      localStorage.setItem('securevault_token', token);
+      const { user } = response.data;
 
       set({
         user,
-        token,
         encryptionKey,
         isAuthenticated: true,
         loading: false,
@@ -51,23 +46,19 @@ export const useAuthStore = create((set, get) => ({
   loginUser: async ({ email, masterPassword }) => {
     set({ loading: true, error: null });
     try {
-      // 1. Fetch user salt from backend
+      // 1. Fetch user salt from backend (anti-enumeration returns deterministic fake salt if non-existent)
       const saltResponse = await authApi.getSalt(email);
       const { salt } = saltResponse.data;
 
       // 2. Derive authHash and AES encryptionKey locally
       const { authHash, encryptionKey } = await deriveClientKeys(masterPassword, salt);
 
-      // 3. Authenticate with backend
+      // 3. Authenticate with backend (sets HttpOnly cookie on res)
       const response = await authApi.login({ email, authHash });
-      const { user, token } = response.data;
-
-      // 4. Save token to localStorage and encryptionKey to memory
-      localStorage.setItem('securevault_token', token);
+      const { user } = response.data;
 
       set({
         user,
-        token,
         encryptionKey,
         isAuthenticated: true,
         loading: false,
@@ -81,7 +72,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   /**
-   * Unlocks vault encryption key if user is authenticated but key is missing from memory.
+   * Unlocks vault encryption key using dedicated /api/auth/verify endpoint (no token re-issuance).
    */
   unlockVault: async (masterPassword) => {
     const { user } = get();
@@ -91,12 +82,8 @@ export const useAuthStore = create((set, get) => ({
     try {
       const { authHash, encryptionKey } = await deriveClientKeys(masterPassword, user.salt);
 
-      // Verify master password against server using authHash before trusting encryptionKey
-      const response = await authApi.login({ email: user.email, authHash });
-      if (response?.data?.token) {
-        localStorage.setItem('securevault_token', response.data.token);
-        set({ token: response.data.token, user: response.data.user || user });
-      }
+      // Verify master password authHash against server under active HttpOnly session
+      await authApi.verifyMasterPassword({ authHash });
 
       set({ encryptionKey, loading: false });
       return { success: true };
@@ -108,26 +95,19 @@ export const useAuthStore = create((set, get) => ({
   },
 
   /**
-   * Checks current auth token validity and reloads user profile.
+   * Checks current auth session status via HttpOnly cookie.
    */
   checkAuth: async () => {
-    const token = localStorage.getItem('securevault_token');
-    if (!token) {
-      set({ isAuthenticated: false, user: null, token: null, encryptionKey: null });
-      return;
-    }
-
     try {
       const response = await authApi.getProfile();
       set({ user: response.data, isAuthenticated: true });
     } catch (err) {
-      localStorage.removeItem('securevault_token');
-      set({ isAuthenticated: false, user: null, token: null, encryptionKey: null });
+      set({ isAuthenticated: false, user: null, encryptionKey: null });
     }
   },
 
   /**
-   * Logs out user and clears memory state.
+   * Logs out user, clears HttpOnly cookie, and purges memory state.
    */
   logoutUser: async () => {
     try {
@@ -135,10 +115,8 @@ export const useAuthStore = create((set, get) => ({
     } catch (err) {
       // Ignore logout API failures
     } finally {
-      localStorage.removeItem('securevault_token');
       set({
         user: null,
-        token: null,
         encryptionKey: null,
         isAuthenticated: false,
         error: null,

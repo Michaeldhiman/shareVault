@@ -3,13 +3,18 @@ import User from '../models/User.js';
 
 /**
  * Authentication Middleware
- * Protects endpoints by verifying incoming JWT tokens in the Authorization header.
+ * Protects endpoints by verifying incoming JWT tokens via HttpOnly Cookies or Authorization header fallback.
  */
 export const protect = async (req, res, next) => {
   try {
     let token;
 
-    if (
+    // 1. Check HttpOnly cookie first (XSS safe)
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+    // 2. Fallback to Authorization header if present
+    else if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
     ) {
@@ -18,7 +23,7 @@ export const protect = async (req, res, next) => {
 
     if (!token) {
       res.status(401);
-      throw new Error('Not authorized, token missing');
+      throw new Error('Not authorized, session token missing');
     }
 
     // Verify token payload
@@ -37,6 +42,12 @@ export const protect = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(401);
-    next(new Error(error.message === 'jwt expired' ? 'Token expired, please log in again' : 'Not authorized, invalid token'));
+    next(
+      new Error(
+        error.message === 'jwt expired'
+          ? 'Token expired, please log in again'
+          : 'Not authorized, invalid session token'
+      )
+    );
   }
 };
