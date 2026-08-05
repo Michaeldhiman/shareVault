@@ -9,6 +9,8 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const VaultPage = lazy(() => import('./pages/VaultPage'));
+const SecurityCenterPage = lazy(() => import('./pages/SecurityCenterPage'));
+const PasswordGeneratorPage = lazy(() => import('./pages/PasswordGeneratorPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 export default function App() {
@@ -37,6 +39,8 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/vault" element={<VaultPage />} />
+            <Route path="/security" element={<SecurityCenterPage />} />
+            <Route path="/generator" element={<PasswordGeneratorPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 

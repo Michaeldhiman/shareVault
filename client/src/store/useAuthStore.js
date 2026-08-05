@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import { authApi } from '../api/authApi';
 import { deriveClientKeys } from '../crypto/keyDerivation';
+import { clearHibpCache } from '../utils/hibpService';
 
 /**
  * Auth Zustand Store
- * Manages user authentication state via HttpOnly Cookies & in-memory Vault Encryption Key.
+ * Manages user authentication state via in-memory Access Tokens & Encryption Keys,
+ * and tracks Refresh Token status silently.
  */
 export const useAuthStore = create((set, get) => ({
   user: null,
+  accessToken: null, // In-memory JWT access token (short-lived, never persisted)
   encryptionKey: null, // Stored strictly in memory, never persisted to disk or localStorage
   isAuthenticated: false,
   loading: false,
@@ -22,12 +25,13 @@ export const useAuthStore = create((set, get) => ({
       // 1. Client-side key derivation via PBKDF2 (100,000 iterations)
       const { authHash, encryptionKey, salt } = await deriveClientKeys(masterPassword);
 
-      // 2. Call register API with authHash and salt (sets HttpOnly cookie on res)
+      // 2. Call register API with authHash and salt (sets HttpOnly cookie, returns accessToken)
       const response = await authApi.register({ name, email, authHash, salt });
-      const { user } = response.data;
+      const { user, accessToken } = response.data;
 
       set({
         user,
+        accessToken,
         encryptionKey,
         isAuthenticated: true,
         loading: false,
@@ -53,12 +57,13 @@ export const useAuthStore = create((set, get) => ({
       // 2. Derive authHash and AES encryptionKey locally
       const { authHash, encryptionKey } = await deriveClientKeys(masterPassword, salt);
 
-      // 3. Authenticate with backend (sets HttpOnly cookie on res)
+      // 3. Authenticate with backend (sets HttpOnly cookie, returns accessToken)
       const response = await authApi.login({ email, authHash });
-      const { user } = response.data;
+      const { user, accessToken } = response.data;
 
       set({
         user,
+        accessToken,
         encryptionKey,
         isAuthenticated: true,
         loading: false,
@@ -82,7 +87,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const { authHash, encryptionKey } = await deriveClientKeys(masterPassword, user.salt);
 
-      // Verify master password authHash against server under active HttpOnly session
+      // Verify master password authHash against server under active session
       await authApi.verifyMasterPassword({ authHash });
 
       set({ encryptionKey, loading: false });
@@ -95,19 +100,33 @@ export const useAuthStore = create((set, get) => ({
   },
 
   /**
-   * Checks current auth session status via HttpOnly cookie.
+   * Checks current auth session status via refresh token flow (silent reload/wake login).
    */
   checkAuth: async () => {
     try {
-      const response = await authApi.getProfile();
-      set({ user: response.data, isAuthenticated: true });
+      // 1. Attempt to renew the access token using the refresh cookie
+      const refreshResponse = await authApi.refresh();
+      const { accessToken } = refreshResponse.data;
+
+      set({ accessToken });
+
+      // 2. Load the profile using the new access token
+      const profileResponse = await authApi.getProfile();
+      set({ user: profileResponse.data, isAuthenticated: true });
     } catch (err) {
-      set({ isAuthenticated: false, user: null, encryptionKey: null });
+      // Wipe state if refresh token is absent or invalid
+      clearHibpCache();
+      set({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        encryptionKey: null,
+      });
     }
   },
 
   /**
-   * Logs out user, clears HttpOnly cookie, and purges memory state.
+   * Logs out user, revokes refresh session in DB, and purges all memory state.
    */
   logoutUser: async () => {
     try {
@@ -115,8 +134,10 @@ export const useAuthStore = create((set, get) => ({
     } catch (err) {
       // Ignore logout API failures
     } finally {
+      clearHibpCache();
       set({
         user: null,
+        accessToken: null,
         encryptionKey: null,
         isAuthenticated: false,
         error: null,

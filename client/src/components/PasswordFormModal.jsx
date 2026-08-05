@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CATEGORIES } from '../constants/categories';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
-import { X, KeyRound, Loader2, Sparkles } from 'lucide-react';
+import { X, KeyRound, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import PasswordStrength from './PasswordStrength';
+import { checkPasswordBreach } from '../utils/hibpService';
 import Button from './ui/Button';
 
 export default function PasswordFormModal({ itemToEdit, onClose, onOpenGenerator }) {
@@ -14,6 +15,34 @@ export default function PasswordFormModal({ itemToEdit, onClose, onOpenGenerator
   const addVaultItem = useVaultStore((state) => state.addVaultItem);
   const updateVaultItem = useVaultStore((state) => state.updateVaultItem);
   const loading = useVaultStore((state) => state.loading);
+
+  // HIBP password check states
+  const [hibpStatus, setHibpStatus] = useState(null); // null | 'checking' | 'compromised' | 'safe' | 'error'
+  const [breachCount, setBreachCount] = useState(0);
+
+  // Debounced check for HIBP Password breaches
+  useEffect(() => {
+    if (!passwordValue) {
+      setHibpStatus(null);
+      return;
+    }
+
+    setHibpStatus('checking');
+
+    const delayDebounce = setTimeout(async () => {
+      const res = await checkPasswordBreach(passwordValue);
+      if (res.error) {
+        setHibpStatus('error');
+      } else if (res.found) {
+        setHibpStatus('compromised');
+        setBreachCount(res.breachCount);
+      } else {
+        setHibpStatus('safe');
+      }
+    }, 800); // 800ms debounce to prevent constant typing requests
+
+    return () => clearTimeout(delayDebounce);
+  }, [passwordValue]);
 
   useEffect(() => {
     if (itemToEdit) {
@@ -130,6 +159,34 @@ export default function PasswordFormModal({ itemToEdit, onClose, onOpenGenerator
             />
             {errors.password && <p className="text-xs text-rose-400 mt-1">{errors.password.message}</p>}
             <PasswordStrength password={passwordValue} />
+
+            {/* HIBP Breach Warning Banners */}
+            {hibpStatus === 'checking' && (
+              <p className="text-[10px] text-slate-400 mt-1.5 animate-pulse">
+                Verifying password safety...
+              </p>
+            )}
+            {hibpStatus === 'compromised' && (
+              <div className="mt-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+                <p className="font-semibold flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>Found in {breachCount.toLocaleString()} public data breaches</span>
+                </p>
+                <p className="text-[10px] text-rose-400/80 mt-1">
+                  Using breached passwords increases risk. Please generate a unique password.
+                </p>
+              </div>
+            )}
+            {hibpStatus === 'safe' && (
+              <p className="text-[10px] text-emerald-400 mt-1.5 flex items-center gap-1.5">
+                <span>✓ Not found in the HIBP breach database.</span>
+              </p>
+            )}
+            {hibpStatus === 'error' && (
+              <p className="text-[10px] text-amber-400 mt-1.5 flex items-center gap-1.5">
+                <span>Unable to verify this password against the breach database.</span>
+              </p>
+            )}
           </div>
 
           <div>

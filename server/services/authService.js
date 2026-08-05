@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import User from '../models/User.js';
-import { generateToken } from '../utils/jwtUtils.js';
+import { generateAccessToken } from '../utils/jwtUtils.js';
+import * as tokenService from './tokenService.js';
 
 /**
  * Service handling authentication & user account business logic.
@@ -39,9 +40,9 @@ export const getUserSaltByEmail = async (email) => {
 };
 
 /**
- * Registers a new user account.
+ * Registers a new user account. Generates Access Token and persistent Refresh Token.
  * @param {object} userData - { name, email, authHash, salt }
- * @returns {Promise<{user: object, token: string}>}
+ * @returns {Promise<{user: object, accessToken: string, refreshToken: string}>}
  */
 export const registerUser = async ({ name, email, authHash, salt }) => {
   const normalizedEmail = email.toLowerCase().trim();
@@ -65,18 +66,20 @@ export const registerUser = async ({ name, email, authHash, salt }) => {
     salt,
   });
 
-  const token = generateToken(user._id);
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = await tokenService.createRefreshToken(user._id);
 
   return {
     user: user.toJSON(),
-    token,
+    accessToken,
+    refreshToken,
   };
 };
 
 /**
- * Authenticates a user login request.
+ * Authenticates a user login request. Generates Access Token and persistent Refresh Token.
  * @param {object} credentials - { email, authHash }
- * @returns {Promise<{user: object, token: string}>}
+ * @returns {Promise<{user: object, accessToken: string, refreshToken: string}>}
  */
 export const loginUser = async ({ email, authHash }) => {
   const normalizedEmail = email.toLowerCase().trim();
@@ -97,11 +100,13 @@ export const loginUser = async ({ email, authHash }) => {
     throw error;
   }
 
-  const token = generateToken(user._id);
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = await tokenService.createRefreshToken(user._id);
 
   return {
     user: user.toJSON(),
-    token,
+    accessToken,
+    refreshToken,
   };
 };
 

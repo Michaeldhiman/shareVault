@@ -23,6 +23,11 @@ export const authApi = {
   login: (payload) => axiosClient.post('/auth/login', payload),
 
   /**
+   * Renew authentication session via HttpOnly Refresh Token cookie.
+   */
+  refresh: () => axiosClient.post('/auth/refresh'),
+
+  /**
    * Verifies master password authHash without issuing a new token or resetting session cookie.
    * @param {object} payload - { authHash }
    */
@@ -43,4 +48,14 @@ export const authApi = {
    * @param {object} payload - { name }
    */
   updateProfile: (payload) => axiosClient.put('/user/profile', payload),
+
+  /**
+   * Retrieves active refresh token sessions.
+   */
+  getSessions: () => axiosClient.get('/auth/sessions'),
+
+  /**
+   * Revokes all refresh token sessions except the current one.
+   */
+  logoutOtherSessions: () => axiosClient.post('/auth/sessions/logout-all'),
 };

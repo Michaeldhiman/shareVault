@@ -4,55 +4,82 @@ import jwt from 'jsonwebtoken';
  * Utility functions for JSON Web Token (JWT) management.
  */
 
+const JWT_SECRET = process.env.JWT_SECRET || 'securevault_fallback_secret_key';
+const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET;
+
 /**
- * Generates a signed JWT for an authenticated user.
+ * Generates a signed short-lived Access Token for API authorization.
  * @param {string} userId - MongoDB _id of the user
- * @returns {string} Signed JWT string
+ * @returns {string} Signed JWT Access Token
  */
-export const generateToken = (userId) => {
+export const generateAccessToken = (userId) => {
   return jwt.sign(
     { id: userId },
-    process.env.JWT_SECRET || 'securevault_fallback_secret_key',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    JWT_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
   );
 };
 
 /**
- * Verifies a JWT token.
- * @param {string} token - JWT token string
- * @returns {object} Decoded token payload
+ * Generates a signed long-lived Refresh Token.
+ * @param {string} userId - MongoDB _id of the user
+ * @returns {string} Signed JWT Refresh Token
  */
-export const verifyToken = (token) => {
-  return jwt.verify(token, process.env.JWT_SECRET || 'securevault_fallback_secret_key');
+export const generateRefreshToken = (userId) => {
+  return jwt.sign(
+    { id: userId },
+    REFRESH_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '30d' }
+  );
 };
 
 /**
- * Sets an HttpOnly, secure authentication cookie on the HTTP response.
- * @param {object} res - Express Response object
- * @param {string} token - Signed JWT string
+ * Verifies a JWT Access Token.
+ * @param {string} token - JWT Access Token
+ * @returns {object} Decoded token payload
  */
-export const sendTokenCookie = (res, token) => {
+export const verifyAccessToken = (token) => {
+  return jwt.verify(token, JWT_SECRET);
+};
+
+/**
+ * Verifies a JWT Refresh Token.
+ * @param {string} token - JWT Refresh Token
+ * @returns {object} Decoded token payload
+ */
+export const verifyRefreshToken = (token) => {
+  return jwt.verify(token, REFRESH_SECRET);
+};
+
+/**
+ * Sets an HttpOnly, secure Refresh Token cookie on the HTTP response.
+ * @param {object} res - Express Response object
+ * @param {string} token - Signed Refresh Token string
+ */
+export const sendRefreshTokenCookie = (res, token) => {
   const isProduction = process.env.NODE_ENV === 'production';
   const cookieOptions = {
     httpOnly: true, // Prevents XSS scripts from reading the token
     secure: isProduction, // Enforces HTTPS in production
     sameSite: isProduction ? 'none' : 'lax', // Protects against CSRF
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+    path: '/api/auth', // Scope the cookie specifically to auth endpoints for security
   };
 
-  res.cookie('token', token, cookieOptions);
+  res.cookie('refreshToken', token, cookieOptions);
 };
 
 /**
- * Clears the HttpOnly authentication cookie upon logout.
+ * Clears the HttpOnly Refresh Token cookie upon logout.
  * @param {object} res - Express Response object
  */
-export const clearTokenCookie = (res) => {
+export const clearRefreshTokenCookie = (res) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  res.cookie('token', '', {
+  res.cookie('refreshToken', '', {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     expires: new Date(0),
+    path: '/api/auth',
   });
 };

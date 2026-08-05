@@ -1,20 +1,17 @@
-import { verifyToken } from '../utils/jwtUtils.js';
+import { verifyAccessToken } from '../utils/jwtUtils.js';
 import User from '../models/User.js';
 
 /**
  * Authentication Middleware
- * Protects endpoints by verifying incoming JWT tokens via HttpOnly Cookies or Authorization header fallback.
+ * Protects endpoints by verifying the incoming Access Token in the Authorization header.
+ * Exclusively checks Bearer token to comply with Access/Refresh token separation.
  */
 export const protect = async (req, res, next) => {
   try {
     let token;
 
-    // 1. Check HttpOnly cookie first (XSS safe)
-    if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-    }
-    // 2. Fallback to Authorization header if present
-    else if (
+    // 1. Check Authorization header for Bearer token
+    if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
     ) {
@@ -23,11 +20,11 @@ export const protect = async (req, res, next) => {
 
     if (!token) {
       res.status(401);
-      throw new Error('Not authorized, session token missing');
+      throw new Error('Not authorized, access token missing');
     }
 
-    // Verify token payload
-    const decoded = verifyToken(token);
+    // Verify access token signature and expiration
+    const decoded = verifyAccessToken(token);
 
     // Fetch user details excluding sensitive authHash
     const user = await User.findById(decoded.id).select('-authHash');
@@ -44,9 +41,9 @@ export const protect = async (req, res, next) => {
     res.status(401);
     next(
       new Error(
-        error.message === 'jwt expired'
+        error.name === 'TokenExpiredError' || error.message === 'jwt expired'
           ? 'Token expired, please log in again'
-          : 'Not authorized, invalid session token'
+          : 'Not authorized, invalid access token'
       )
     );
   }
