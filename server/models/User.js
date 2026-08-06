@@ -22,11 +22,28 @@ const userSchema = new mongoose.Schema(
     },
     authHash: {
       type: String,
-      required: [true, 'Authentication hash is required'],
+      required: false, // Optional for initial Google signup prior to Master Password setup
     },
     salt: {
       type: String,
-      required: [true, 'Cryptographic salt is required'],
+      required: false, // Required for vault PBKDF2 encryption key derivation
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+    },
+    profilePicture: {
+      type: String,
+      default: '',
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {
