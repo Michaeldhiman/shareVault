@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
 import DashboardLayout from '../layouts/DashboardLayout';
@@ -11,7 +11,7 @@ import VaultSkeleton from '../components/skeletons/VaultSkeleton';
 import ConfirmationDialog from '../components/ui/ConfirmationDialog';
 import Button from '../components/ui/Button';
 import { CATEGORIES } from '../constants/categories';
-import { KeyRound, Search, Plus, Star, ArrowUpDown } from 'lucide-react';
+import { KeyRound, Search, Plus, Star, ArrowUpDown, ShieldCheck } from 'lucide-react';
 
 export default function VaultPage() {
   const encryptionKey = useAuthStore((state) => state.encryptionKey);
@@ -20,7 +20,10 @@ export default function VaultPage() {
   const deleteVaultItem = useVaultStore((state) => state.deleteVaultItem);
   const loading = useVaultStore((state) => state.loading);
 
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
+  const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState('All');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'alphabetical'
@@ -39,6 +42,13 @@ export default function VaultPage() {
       fetchVault(encryptionKey);
     }
   }, [encryptionKey, fetchVault]);
+
+  useEffect(() => {
+    const urlQuery = searchParams.get('search');
+    if (urlQuery !== null) {
+      setSearch(urlQuery);
+    }
+  }, [searchParams]);
 
   // Filter & Sort Logic
   const filteredAndSortedItems = useMemo(() => {
@@ -86,20 +96,20 @@ export default function VaultPage() {
       {loading && items.length === 0 ? (
         <VaultSkeleton />
       ) : (
-        <div className="space-y-8 pb-12">
+        <div className="space-y-6 pb-12 font-sans">
           {/* Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#242433] pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/[0.07] pb-5">
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight font-heading">
                   Vault Credentials
                 </h1>
-                <span className="bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[10px] px-2.5 py-0.5 rounded-full font-bold">
-                  {items.length} Stored
+                <span className="bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                  {items.length} {items.length === 1 ? 'Stored' : 'Stored'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Manage, search, and retrieve all your AES-GCM 255-bit encrypted credential assets locally.
+                Manage, filter, and access your client-side AES-GCM 256-bit encrypted credential vault.
               </p>
             </div>
 
@@ -111,7 +121,7 @@ export default function VaultPage() {
                   setItemToEdit(null);
                   setIsAddModalOpen(true);
                 }}
-                className="shadow-blue-600/10 text-xs py-2 px-3.5"
+                className="text-xs py-2 px-4 shadow-sm"
               >
                 Add Credential
               </Button>
@@ -119,18 +129,18 @@ export default function VaultPage() {
           </div>
 
           {/* Control Bar: Search, Favorites Filter, Sort */}
-          <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-4 shadow-xl space-y-4 backdrop-blur-md">
+          <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-4 shadow-xl space-y-4 backdrop-blur-md">
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
               {/* Search input */}
               <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
                 <input
                   type="text"
                   id="vault-search"
                   placeholder="Search website, username, or notes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans"
+                  className="w-full bg-[#0B0C10] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans"
                 />
               </div>
 
@@ -138,10 +148,10 @@ export default function VaultPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border cursor-pointer ${
                     showFavoritesOnly
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold shadow-sm'
-                      : 'bg-slate-950 border-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold'
+                      : 'bg-[#0B0C10] border-white/[0.08] text-slate-400 hover:text-white'
                   }`}
                 >
                   <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-amber-400 text-amber-400' : ''}`} />
@@ -149,31 +159,31 @@ export default function VaultPage() {
                 </button>
 
                 {/* Sort Selector */}
-                <div className="flex items-center gap-1 bg-slate-950 border border-slate-900 rounded-xl px-2.5 py-1.5">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
+                <div className="flex items-center gap-1 bg-[#0B0C10] border border-white/[0.08] rounded-xl px-2.5 py-1.5">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="bg-transparent text-xs text-slate-300 focus:outline-none cursor-pointer font-sans"
                   >
-                    <option value="newest" className="bg-[#151521] text-white">Newest First</option>
-                    <option value="oldest" className="bg-[#151521] text-white">Oldest First</option>
-                    <option value="alphabetical" className="bg-[#151521] text-white">Alphabetical (A-Z)</option>
+                    <option value="newest" className="bg-[#12141C] text-white">Newest First</option>
+                    <option value="oldest" className="bg-[#12141C] text-white">Oldest First</option>
+                    <option value="alphabetical" className="bg-[#12141C] text-white">Alphabetical (A-Z)</option>
                   </select>
                 </div>
               </div>
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pt-3 border-t border-slate-900/60 scrollbar-none">
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-3 border-t border-white/[0.06] scrollbar-none">
               {['All', ...CATEGORIES].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                     category === cat
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-slate-950 hover:bg-slate-900 border border-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-[#0B0C10] hover:bg-white/[0.05] border border-white/[0.08] text-slate-400 hover:text-white'
                   }`}
                 >
                   {cat}
@@ -199,8 +209,8 @@ export default function VaultPage() {
               ))}
             </motion.div>
           ) : (
-            <div className="bg-[#151521]/40 border border-[#242433] rounded-2xl py-16 px-4 text-center max-w-md mx-auto backdrop-blur-sm shadow-lg">
-              <KeyRound className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl py-16 px-4 text-center max-w-md mx-auto backdrop-blur-sm shadow-lg">
+              <KeyRound className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-base font-bold text-white mb-1 font-heading">No credentials found</h3>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">
                 {search || category !== 'All' || showFavoritesOnly
@@ -233,7 +243,7 @@ export default function VaultPage() {
           }}
           onOpenGenerator={() => {
             setIsAddModalOpen(false);
-            navigate('/generator'); // Navigate directly to full page
+            navigate('/generator');
           }}
         />
       )}

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../layouts/DashboardLayout';
-import PasswordStrength from '../components/PasswordStrength';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
-import { Sparkles, Copy, RefreshCw, KeyRound, Check, HelpCircle, History } from 'lucide-react';
+import { Sparkles, Copy, RefreshCw, KeyRound, Check, History, ShieldCheck } from 'lucide-react';
 
 export default function PasswordGeneratorPage() {
   const [length, setLength] = useState(18);
@@ -12,9 +11,10 @@ export default function PasswordGeneratorPage() {
   const [includeLower, setIncludeLower] = useState(true);
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSymbols, setIncludeSymbols] = useState(true);
-  
+
   const [password, setPassword] = useState('');
-  const [history, setHistory] = useState([]); // In-memory session history log
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  const [history, setHistory] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
 
   const triggerToast = (msg) => {
@@ -48,7 +48,7 @@ export default function PasswordGeneratorPage() {
 
     // Save to local in-memory session history
     setHistory((prev) => {
-      const updated = [result, ...prev].slice(0, 10); // Keep last 10 generated items
+      const updated = [result, ...prev].slice(0, 10);
       return updated;
     });
   }, [length, includeUpper, includeLower, includeNumbers, includeSymbols]);
@@ -57,10 +57,12 @@ export default function PasswordGeneratorPage() {
     generatePassword();
   }, [generatePassword]);
 
-  const handleCopy = (val) => {
+  const handleCopy = (val, keyIdx = 'main') => {
     if (!val) return;
     navigator.clipboard.writeText(val);
+    setCopiedIndex(keyIdx);
     triggerToast('Password copied to clipboard');
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   // Calculate bits of entropy: E = L * log2(R)
@@ -78,78 +80,75 @@ export default function PasswordGeneratorPage() {
 
   const entropyBits = calculateEntropy();
 
-  // Get qualitative rating for entropy
   const getEntropyRating = (bits) => {
     if (bits < 40) return { label: 'Very Weak', color: 'text-rose-400', barColor: 'bg-rose-500' };
     if (bits < 60) return { label: 'Weak', color: 'text-amber-400', barColor: 'bg-amber-500' };
     if (bits < 80) return { label: 'Moderate', color: 'text-blue-400', barColor: 'bg-blue-500' };
-    return { label: 'Strong / High Entropy', color: 'text-emerald-400', barColor: 'bg-emerald-500' };
+    return { label: 'High Entropy / Secure', color: 'text-emerald-400', barColor: 'bg-emerald-500' };
   };
 
   const rating = getEntropyRating(entropyBits);
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 pb-12">
+      <div className="space-y-6 pb-12 font-sans">
         {/* Title Header */}
-        <div className="border-b border-[#242433] pb-5">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-            Cryptographic Key Engine
+        <div className="border-b border-white/[0.07] pb-5">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+            Cryptographic Seed Engine
           </span>
           <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1 font-heading">
             Password Generator
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Create strong keys locally using uniform random cryptographical seed generators.
+            Generate cryptographically secure, high-entropy passwords directly in client browser memory.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
           {/* Settings & Controls (Left 2-Columns) */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Generated Password Box */}
-            <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-5 shadow-lg flex flex-col justify-between backdrop-blur-md">
-              <div className="bg-slate-950 border border-slate-900 rounded-xl p-4.5 flex items-center justify-between shadow-inner">
+            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-5 shadow-xl flex flex-col justify-between backdrop-blur-md">
+              <div className="bg-[#0B0C10] border border-white/[0.08] rounded-xl p-4 flex items-center justify-between shadow-inner">
                 <span className="font-mono text-base sm:text-lg font-bold text-white tracking-wider truncate pr-4 select-all">
                   {password || 'Select parameters'}
                 </span>
-                
+
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={generatePassword}
-                    className="p-2.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors"
+                    className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.08] border border-transparent hover:border-white/10 transition-colors"
                     title="Regenerate"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </button>
-                  
+
                   <Button
                     size="sm"
                     variant="primary"
-                    icon={Copy}
-                    onClick={() => handleCopy(password)}
+                    icon={copiedIndex === 'main' ? Check : Copy}
+                    onClick={() => handleCopy(password, 'main')}
                     className="text-xs py-2 px-3 shadow-md"
                   >
-                    Copy
+                    {copiedIndex === 'main' ? 'Copied' : 'Copy'}
                   </Button>
                 </div>
               </div>
 
               {/* Entropy and Strength indicators */}
-              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-900 pt-4">
+              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-white/[0.06] pt-4">
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-bold mb-1">
+                  <div className="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-bold mb-1">
                     Strength Level
                   </div>
                   <span className={`text-xs font-bold ${rating.color}`}>
                     {rating.label}
                   </span>
                 </div>
-                
+
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-bold mb-1">
+                  <div className="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-bold mb-1">
                     Entropy Score
                   </div>
                   <span className="text-xs font-bold text-white font-mono">
@@ -159,7 +158,7 @@ export default function PasswordGeneratorPage() {
               </div>
 
               {/* Strength indicator progress scale bar */}
-              <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden mt-3 border border-[#242433]">
+              <div className="w-full bg-[#0B0C10] h-1.5 rounded-full overflow-hidden mt-3 border border-white/[0.06]">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, (entropyBits / 128) * 100)}%` }}
@@ -170,7 +169,7 @@ export default function PasswordGeneratorPage() {
             </div>
 
             {/* Parameter Options */}
-            <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-5 shadow-lg space-y-5 backdrop-blur-md">
+            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-5 shadow-xl space-y-5 backdrop-blur-md">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-heading">
                 Configuration Parameters
               </h3>
@@ -178,7 +177,7 @@ export default function PasswordGeneratorPage() {
               {/* Length Slider */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-semibold">Password Length</span>
+                  <span className="text-slate-300 font-semibold">Password Length</span>
                   <span className="font-mono text-blue-400 font-bold bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-md">
                     {length} characters
                   </span>
@@ -189,108 +188,110 @@ export default function PasswordGeneratorPage() {
                   max="64"
                   value={length}
                   onChange={(e) => setLength(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-[#242433]"
+                  className="w-full h-1.5 bg-[#0B0C10] rounded-lg appearance-none cursor-pointer accent-blue-500 border border-white/[0.08]"
                 />
               </div>
 
               {/* Option Toggles grid */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <label className="flex items-center gap-3 bg-slate-950/40 p-3 rounded-xl border border-[#242433] cursor-pointer hover:border-slate-800 transition-colors">
+                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
                   <input
                     type="checkbox"
                     checked={includeUpper}
                     onChange={(e) => setIncludeUpper(e.target.checked)}
-                    className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4"
+                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
                     <p className="font-bold text-slate-200">Uppercase</p>
-                    <p className="text-[9px] text-slate-500 font-mono">A-Z characters</p>
+                    <p className="text-[10px] text-slate-400 font-mono">A-Z characters</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-slate-950/40 p-3 rounded-xl border border-[#242433] cursor-pointer hover:border-slate-800 transition-colors">
+                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
                   <input
                     type="checkbox"
                     checked={includeLower}
                     onChange={(e) => setIncludeLower(e.target.checked)}
-                    className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4"
+                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
                     <p className="font-bold text-slate-200">Lowercase</p>
-                    <p className="text-[9px] text-slate-500 font-mono">a-z characters</p>
+                    <p className="text-[10px] text-slate-400 font-mono">a-z characters</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-slate-950/40 p-3 rounded-xl border border-[#242433] cursor-pointer hover:border-slate-800 transition-colors">
+                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
                   <input
                     type="checkbox"
                     checked={includeNumbers}
                     onChange={(e) => setIncludeNumbers(e.target.checked)}
-                    className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4"
+                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
                     <p className="font-bold text-slate-200">Numbers</p>
-                    <p className="text-[9px] text-slate-500 font-mono">0-9 integers</p>
+                    <p className="text-[10px] text-slate-400 font-mono">0-9 integers</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-slate-950/40 p-3 rounded-xl border border-[#242433] cursor-pointer hover:border-slate-800 transition-colors">
+                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
                   <input
                     type="checkbox"
                     checked={includeSymbols}
                     onChange={(e) => setIncludeSymbols(e.target.checked)}
-                    className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4"
+                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
                     <p className="font-bold text-slate-200">Symbols</p>
-                    <p className="text-[9px] text-slate-500 font-mono">!@#$ specials</p>
+                    <p className="text-[10px] text-slate-400 font-mono">!@#$ specials</p>
                   </div>
                 </label>
               </div>
             </div>
-
           </div>
 
           {/* Session History Log (Right Column) */}
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-slate-500" />
+              <History className="w-4 h-4 text-slate-400" />
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-heading">
-                Session History
+                Session Log
               </h3>
             </div>
 
-            <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-4.5 shadow-lg backdrop-blur-md space-y-3">
-              <p className="text-[9px] text-slate-500 leading-normal">
-                History is preserved in-memory for the current browser session. It is purged automatically when the tab is closed or locked.
+            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-4.5 shadow-xl backdrop-blur-md space-y-3">
+              <p className="text-[10px] text-slate-400 leading-normal">
+                History is stored in volatile browser memory during active session only.
               </p>
-              
+
               <ul className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                 {history.length > 1 ? (
                   history.slice(1).map((val, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-lg p-2 text-xs"
+                      className="flex items-center justify-between bg-[#0B0C10] border border-white/[0.06] rounded-xl p-2.5 text-xs"
                     >
                       <span className="font-mono text-slate-300 truncate pr-2 select-all">
                         {val}
                       </span>
                       <button
-                        onClick={() => handleCopy(val)}
-                        className="text-slate-400 hover:text-white p-1 hover:bg-slate-900 rounded-md transition-colors shrink-0"
+                        onClick={() => handleCopy(val, idx)}
+                        className="text-slate-400 hover:text-white p-1 hover:bg-white/[0.08] rounded-md transition-colors shrink-0"
                         title="Copy password"
                       >
-                        <Copy className="w-3.5 h-3.5" />
+                        {copiedIndex === idx ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                       </button>
                     </li>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-500 py-4 text-center">No prior passwords generated.</p>
+                  <p className="text-xs text-slate-400 py-4 text-center">No prior passwords generated.</p>
                 )}
               </ul>
             </div>
           </div>
-
         </div>
       </div>
 

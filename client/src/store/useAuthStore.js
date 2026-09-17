@@ -126,6 +126,13 @@ export const useAuthStore = create((set, get) => ({
   },
 
   /**
+   * Locks the vault by clearing the client-side encryption key from memory.
+   */
+  lockVault: () => {
+    set({ encryptionKey: null });
+  },
+
+  /**
    * Logs out user, revokes refresh session in DB, and purges all memory state.
    */
   logoutUser: async () => {

@@ -13,11 +13,8 @@ import {
   Save,
   LogOut,
   CheckCircle2,
-  AlertTriangle,
   Monitor,
-  Laptop,
-  Check,
-  Globe
+  Laptop
 } from 'lucide-react';
 import { authApi } from '../api/authApi';
 
@@ -25,7 +22,7 @@ export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const logoutUser = useAuthStore((state) => state.logoutUser);
-  
+
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -34,10 +31,6 @@ export default function ProfilePage() {
   // Active Sessions State
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
-
-  // Mock settings toggles
-  const [googleConnected, setGoogleConnected] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(true);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -99,36 +92,36 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="max-w-3xl mx-auto space-y-6 font-sans"
+        transition={{ duration: 0.2 }}
+        className="max-w-3xl mx-auto space-y-6 font-sans pb-12"
       >
         {/* User Hero Avatar Banner */}
-        <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 backdrop-blur-md">
+        <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 backdrop-blur-md">
           <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-650 text-white font-extrabold text-xl flex items-center justify-center shadow-lg shadow-blue-600/10 font-heading shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-extrabold text-xl flex items-center justify-center shadow-lg shadow-blue-600/20 font-heading shrink-0 border border-blue-400/30">
               {initials}
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight font-heading">
                 {user?.name || 'Account User'}
               </h1>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">{user?.email}</p>
+              <p className="text-xs text-slate-400 font-mono mt-0.5">{user?.email}</p>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold mt-2">
                 <CheckCircle2 className="w-3 h-3" />
-                <span>Zero-Knowledge Vault Protected</span>
+                <span>Zero-Knowledge Protected</span>
               </div>
             </div>
           </div>
 
           <Button
-            variant="ghost"
+            variant="danger"
             icon={LogOut}
             onClick={logoutUser}
-            className="text-rose-450 hover:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 text-xs shrink-0"
+            className="text-xs shrink-0"
           >
-            Lock Vault & Sign Out
+            Lock & Sign Out
           </Button>
         </div>
 
@@ -139,8 +132,8 @@ export default function ProfilePage() {
         )}
 
         {/* Profile Details Form Card */}
-        <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-          <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
+        <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
+          <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
             <User className="w-4 h-4 text-blue-400" />
             <h2 className="text-sm font-bold text-white font-heading">Personal Information</h2>
           </div>
@@ -148,7 +141,7 @@ export default function ProfilePage() {
           <form onSubmit={handleUpdate} className="space-y-4 pt-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="profile-name" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                <label htmlFor="profile-name" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 font-mono">
                   Full Name
                 </label>
                 <input
@@ -157,12 +150,12 @@ export default function ProfilePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans"
+                  className="w-full bg-[#0B0C10] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans"
                 />
               </div>
 
               <div>
-                <label htmlFor="profile-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                <label htmlFor="profile-email" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 font-mono">
                   Email Address (Read Only)
                 </label>
                 <input
@@ -170,7 +163,7 @@ export default function ProfilePage() {
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="w-full bg-slate-950/60 border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs text-slate-500 cursor-not-allowed font-mono"
+                  className="w-full bg-[#0B0C10]/60 border border-white/[0.05] rounded-xl px-3.5 py-2.5 text-xs text-slate-400 cursor-not-allowed font-mono"
                 />
               </div>
             </div>
@@ -181,89 +174,48 @@ export default function ProfilePage() {
                 variant="primary"
                 icon={Save}
                 isLoading={loading}
-                className="shadow-blue-600/10 text-xs"
+                className="text-xs"
               >
-                Save Profile Name
+                Save Profile
               </Button>
             </div>
           </form>
         </div>
 
-        {/* Mock Connected Toggles */}
-        <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-          <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
-            <Globe className="w-4 h-4 text-purple-400" />
-            <h2 className="text-sm font-bold text-white font-heading">Security Integrations</h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 text-xs">
-            <div className="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-900 rounded-xl">
-              <div>
-                <p className="font-bold text-slate-200">Google OAuth Identity</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">Use single sign-on parameters</p>
-              </div>
-              <button
-                onClick={() => {
-                  setGoogleConnected(!googleConnected);
-                  triggerToast(googleConnected ? 'Google OAuth disconnected' : 'Google OAuth connected successfully');
-                }}
-                className={`px-3 py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${
-                  googleConnected
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {googleConnected ? 'Connected' : 'Connect Account'}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-900 rounded-xl">
-              <div>
-                <p className="font-bold text-slate-200">Email Verification</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">Status of registered email</p>
-              </div>
-              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                Verified
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Active Session Registry */}
-        <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-          <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+        <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
+          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <div className="flex items-center gap-2">
               <Laptop className="w-4 h-4 text-blue-400" />
               <h2 className="text-sm font-bold text-white font-heading">Active Sessions</h2>
             </div>
-            
+
             {sessions.length > 1 && (
               <button
                 onClick={handleLogoutOtherDevices}
-                className="text-[10px] font-bold text-rose-400 hover:text-rose-300 transition-colors bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/10 px-2.5 py-1.5 rounded-lg"
+                className="text-[10px] font-bold text-rose-400 hover:text-rose-300 transition-colors bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-2.5 py-1.5 rounded-lg"
               >
                 Logout Other Devices
               </button>
             )}
           </div>
 
-          <p className="text-[10px] text-slate-400 leading-relaxed">
-            These are devices and tabs that have active Refresh Tokens in the database. Revoking a session immediately terminates its ability to renew Access Tokens.
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Active Refresh Tokens registered in the database. Revoking session terminates renewal privileges immediately.
           </p>
 
           <ul className="space-y-2 pt-1">
             {loadingSessions && sessions.length === 0 ? (
-              <p className="text-xs text-slate-500 animate-pulse">Loading active sessions...</p>
+              <p className="text-xs text-slate-400 animate-pulse">Loading active sessions...</p>
             ) : sessions.map((sess) => (
               <li
                 key={sess.id}
-                className={`flex items-center justify-between bg-slate-950/40 border p-3.5 rounded-xl text-xs ${
-                  sess.isCurrent ? 'border-blue-500/25 bg-blue-600/5' : 'border-slate-900'
+                className={`flex items-center justify-between bg-[#0B0C10] border p-3.5 rounded-xl text-xs ${
+                  sess.isCurrent ? 'border-blue-500/30 bg-blue-500/[0.04]' : 'border-white/[0.06]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${sess.isCurrent ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-900 text-slate-400'}`}>
+                  <div className={`p-2 rounded-lg ${sess.isCurrent ? 'bg-blue-500/10 text-blue-400' : 'bg-white/[0.04] text-slate-400'}`}>
                     <Monitor className="w-4 h-4" />
                   </div>
                   <div>
@@ -272,20 +224,20 @@ export default function ProfilePage() {
                         {sess.isCurrent ? 'Current Browser Tab' : 'Other Connected Device'}
                       </span>
                       {sess.isCurrent && (
-                        <span className="text-[8px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-400 rounded">
+                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-400 rounded">
                           Active
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
                       Session established: {new Date(sess.createdAt).toLocaleString()}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[9px] text-slate-500 font-mono uppercase block">Expires At</span>
-                  <span className="font-mono text-[10px] text-slate-400">
+                  <span className="text-[9px] text-slate-400 font-mono uppercase block">Expires At</span>
+                  <span className="font-mono text-[10px] text-slate-300">
                     {new Date(sess.expiresAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -295,14 +247,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Cryptography Specs Card */}
-        <div className="bg-[#151521]/60 border border-[#242433] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-          <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
+        <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md">
+          <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-white font-heading">Encryption Protocol Standards</h2>
+            <h2 className="text-sm font-bold text-white font-heading">Encryption Protocols</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <div className="bg-slate-950/70 border border-slate-900 p-4 rounded-xl space-y-1">
+            <div className="bg-[#0B0C10] border border-white/[0.06] p-4 rounded-xl space-y-1">
               <div className="flex items-center gap-2 text-blue-400 text-xs font-bold font-heading">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Zero-Knowledge Architecture</span>
@@ -312,7 +264,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="bg-slate-950/70 border border-slate-900 p-4 rounded-xl space-y-1">
+            <div className="bg-[#0B0C10] border border-white/[0.06] p-4 rounded-xl space-y-1">
               <div className="flex items-center gap-2 text-purple-400 text-xs font-bold font-heading">
                 <KeyRound className="w-4 h-4" />
                 <span>PBKDF2 Key Derivation</span>
@@ -322,7 +274,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="bg-slate-950/70 border border-slate-900 p-4 rounded-xl space-y-1">
+            <div className="bg-[#0B0C10] border border-white/[0.06] p-4 rounded-xl space-y-1">
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold font-heading">
                 <Lock className="w-4 h-4" />
                 <span>AES-GCM 256-bit Encryption</span>
@@ -332,13 +284,13 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="bg-slate-950/70 border border-slate-900 p-4 rounded-xl space-y-1">
+            <div className="bg-[#0B0C10] border border-white/[0.06] p-4 rounded-xl space-y-1">
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold font-heading">
                 <Database className="w-4 h-4" />
                 <span>Isolated Ciphertext Storage</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                MongoDB stores ciphertext payload only. Server cannot read stored password values.
+                Database stores ciphertext payload only. Server cannot read stored password values.
               </p>
             </div>
           </div>

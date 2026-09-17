@@ -3,12 +3,312 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Existing dashboard tokens */
+    --color-bg-main: #0B0C10;
+    --color-bg-card: #12141C;
+    --color-border-subtle: rgba(255, 255, 255, 0.07);
+    --color-border-hover: rgba(255, 255, 255, 0.14);
+    --color-accent-blue: #3B82F6;
+    --color-accent-emerald: #10B981;
+
+    /* Landing page design tokens */
+    --vault-bg: #020203;
+    --vault-base: #050506;
+    --vault-elevated: #0a0a0c;
+    --vault-surface: rgba(255, 255, 255, 0.04);
+    --vault-border: rgba(255, 255, 255, 0.08);
+    --vault-border-hover: rgba(255, 255, 255, 0.16);
+    --vault-green: #10B981;
+    --vault-green-glow: rgba(16, 185, 129, 0.15);
+    --vault-green-mid: rgba(16, 185, 129, 0.3);
+    --vault-indigo: #5E6AD2;
+    --vault-indigo-glow: rgba(94, 106, 210, 0.15);
+    --vault-muted: #8A8F98;
+    --vault-foreground: #EDEDEF;
+    --vault-easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --vault-radius: 16px;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-600 selection:text-white;
+    @apply bg-[#0B0C10] text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-600/20 selection:text-emerald-200;
+  }
+
+  /* Landing page body override applied via .landing-page class */
+  .landing-page {
+    background-color: #020203;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.10), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(94, 106, 210, 0.07), transparent),
+      radial-gradient(ellipse 40% 30% at 20% 60%, rgba(16, 185, 129, 0.04), transparent);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     @apply tracking-tight;
   }
 }
+
+/* ─── Custom Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.4); }
+
+/* ─── Scroll Progress Bar ───────────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #10B981, #5E6AD2);
+  transform-origin: left;
+  z-index: 1000;
+}
+
+/* ─── Glassmorphism Utilities ───────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.glass-strong {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--vault-radius);
+  transition: border-color 0.3s var(--vault-easing), background 0.3s var(--vault-easing), box-shadow 0.3s var(--vault-easing);
+}
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.06);
+}
+
+/* ─── Glow Effects ──────────────────────────────────────────────── */
+.glow-green {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.2), 0 0 80px rgba(16, 185, 129, 0.06);
+}
+.glow-green-sm {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 40px rgba(16, 185, 129, 0.05);
+}
+.glow-indigo {
+  box-shadow: 0 0 40px rgba(94, 106, 210, 0.2), 0 0 80px rgba(94, 106, 210, 0.06);
+}
+.text-glow-green {
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.2);
+}
+
+/* ─── Editorial Typography ──────────────────────────────────────── */
+.font-editorial {
+  font-family: 'Bodoni Moda', Georgia, serif;
+}
+.font-display {
+  font-family: 'Jost', Inter, sans-serif;
+}
+.text-gradient-green {
+  background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-mixed {
+  background: linear-gradient(135deg, #EDEDEF 0%, #10B981 50%, #5E6AD2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-white {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Shimmer Effect ────────────────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.6) 0%,
+    rgba(255,255,255,1) 30%,
+    rgba(16,185,129,0.9) 50%,
+    rgba(255,255,255,1) 70%,
+    rgba(255,255,255,0.6) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ─── Button Styles ─────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--vault-easing), box-shadow 0.2s var(--vault-easing);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25), 0 1px 3px rgba(0,0,0,0.3);
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  border-radius: inherit;
+}
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0,0,0,0.4);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s var(--vault-easing);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* ─── Section Utilities ─────────────────────────────────────────── */
+.section-padding {
+  padding: 7rem 0;
+}
+.section-padding-sm {
+  padding: 4rem 0;
+}
+.container-xl {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+@media (min-width: 640px) {
+  .container-xl { padding: 0 32px; }
+}
+@media (min-width: 1024px) {
+  .container-xl { padding: 0 64px; }
+}
+
+/* ─── Badge ─────────────────────────────────────────────────────── */
+.badge-green {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 9999px;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #34D399;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.badge-indigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(94, 106, 210, 0.1);
+  border: 1px solid rgba(94, 106, 210, 0.25);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #818CF8;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Noise Overlay ──────────────────────────────────────────────  */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ─── Vault Icon Glow ───────────────────────────────────────────── */
+.vault-ring {
+  position: relative;
+}
+.vault-ring::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ─── Reduced Motion ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Existing Utilities ────────────────────────────────────────── */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ─── Landing Section Dividers ─────────────────────────────────── */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+}
+

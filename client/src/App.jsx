@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import PageLoader from './components/ui/PageLoader';
 
 // Lazy-loaded page components for dynamic code-splitting & optimal bundle chunking
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -27,6 +28,10 @@ export default function App() {
         <Routes>
           {/* Public Routes */}
           <Route
+            path="/"
+            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />}
+          />
+          <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
           />
@@ -47,7 +52,7 @@ export default function App() {
           {/* Fallback Redirect */}
           <Route
             path="*"
-            element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+            element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />}
           />
         </Routes>
       </Suspense>
