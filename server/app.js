@@ -11,6 +11,9 @@ import { notFoundHandler, errorHandler } from './middleware/errorMiddleware.js';
 
 const app = express();
 
+// Trust reverse proxy (e.g., Render, Heroku) for rate limiter IP identification
+app.set('trust proxy', 1);
+
 // Security HTTP Headers
 app.use(helmet());
 
