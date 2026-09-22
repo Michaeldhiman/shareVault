@@ -270,7 +270,13 @@ export default function HeroSection() {
                 href="#how-it-works"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  const el = document.getElementById('how-it-works');
+                  if (el) {
+                    const navOffset = 72;
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                  }
                 }}
                 className="w-full sm:w-auto group"
               >

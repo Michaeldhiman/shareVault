@@ -30,8 +30,18 @@ export default function LandingNav() {
 
   const handleNavClick = (href) => {
     setMobileOpen(false);
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!href || !href.startsWith('#')) return;
+    const targetId = href.replace('#', '');
+    const el = document.getElementById(targetId);
+    if (el) {
+      const navOffset = 72;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
 
   return (

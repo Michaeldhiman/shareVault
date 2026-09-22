@@ -52,6 +52,10 @@
     --sv-shadow-lg:        0 8px 24px rgba(0, 0, 0, 0.5);
   }
 
+  html {
+    scroll-padding-top: 80px;
+  }
+
   body {
     background-color: var(--sv-bg);
     color: var(--sv-text-primary);
@@ -70,6 +74,18 @@
     font-family: 'Inter', sans-serif;
     @apply tracking-tight;
   }
+}
+
+/* ─── Scroll Progress Bar ───────────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--sv-accent);
+  transform-origin: 0%;
+  z-index: 9999;
 }
 
 /* ─── Custom Scrollbar ──────────────────────────────────────────── */
