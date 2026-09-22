@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
+import Card from '../components/ui/Card';
 import { Sparkles, Copy, RefreshCw, KeyRound, Check, History, ShieldCheck } from 'lucide-react';
 
 export default function PasswordGeneratorPage() {
@@ -83,8 +84,8 @@ export default function PasswordGeneratorPage() {
   const getEntropyRating = (bits) => {
     if (bits < 40) return { label: 'Very Weak', color: 'text-rose-400', barColor: 'bg-rose-500' };
     if (bits < 60) return { label: 'Weak', color: 'text-amber-400', barColor: 'bg-amber-500' };
-    if (bits < 80) return { label: 'Moderate', color: 'text-blue-400', barColor: 'bg-blue-500' };
-    return { label: 'High Entropy / Secure', color: 'text-emerald-400', barColor: 'bg-emerald-500' };
+    if (bits < 80) return { label: 'Moderate', color: 'text-[var(--sv-info)]', barColor: 'bg-[var(--sv-info)]' };
+    return { label: 'High Entropy / Secure', color: 'text-[var(--sv-accent)]', barColor: 'bg-[var(--sv-accent)]' };
   };
 
   const rating = getEntropyRating(entropyBits);
@@ -93,14 +94,14 @@ export default function PasswordGeneratorPage() {
     <DashboardLayout>
       <div className="space-y-6 pb-12 font-sans">
         {/* Title Header */}
-        <div className="border-b border-white/[0.07] pb-5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+        <div className="border-b border-[var(--sv-border)] pb-5">
+          <span className="text-[10px] font-bold text-[var(--sv-text-secondary)] uppercase tracking-widest font-mono">
             Cryptographic Seed Engine
           </span>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1 font-heading">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[var(--sv-text-primary)] tracking-tight mt-1 font-sans">
             Password Generator
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[var(--sv-text-muted)] mt-0.5">
             Generate cryptographically secure, high-entropy passwords directly in client browser memory.
           </p>
         </div>
@@ -109,17 +110,21 @@ export default function PasswordGeneratorPage() {
           {/* Settings & Controls (Left 2-Columns) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Generated Password Box */}
-            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-5 shadow-xl flex flex-col justify-between backdrop-blur-md">
-              <div className="bg-[#0B0C10] border border-white/[0.08] rounded-xl p-4 flex items-center justify-between shadow-inner">
-                <span className="font-mono text-base sm:text-lg font-bold text-white tracking-wider truncate pr-4 select-all">
+            <Card className="p-5 flex flex-col justify-between backdrop-blur-md">
+              <div 
+                className="bg-[var(--sv-bg)] border border-[var(--sv-border)] rounded-xl p-4 flex items-center justify-between shadow-inner"
+                aria-live="polite"
+              >
+                <span className="font-mono text-base sm:text-lg font-bold text-[var(--sv-text-primary)] tracking-wider truncate pr-4 select-all">
                   {password || 'Select parameters'}
                 </span>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={generatePassword}
-                    className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.08] border border-transparent hover:border-white/10 transition-colors"
+                    className="p-2 text-[var(--sv-text-secondary)] hover:text-[var(--sv-text-primary)] rounded-lg hover:bg-[var(--sv-border-hover)] border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sv-accent)]/40"
                     title="Regenerate"
+                    aria-label="Regenerate Password"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </button>
@@ -137,9 +142,9 @@ export default function PasswordGeneratorPage() {
               </div>
 
               {/* Entropy and Strength indicators */}
-              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-white/[0.06] pt-4">
+              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-[var(--sv-border)] pt-4">
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-bold mb-1">
+                  <div className="text-[9px] uppercase tracking-wider text-[var(--sv-text-secondary)] font-mono font-bold mb-1">
                     Strength Level
                   </div>
                   <span className={`text-xs font-bold ${rating.color}`}>
@@ -148,17 +153,23 @@ export default function PasswordGeneratorPage() {
                 </div>
 
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-bold mb-1">
+                  <div className="text-[9px] uppercase tracking-wider text-[var(--sv-text-secondary)] font-mono font-bold mb-1">
                     Entropy Score
                   </div>
-                  <span className="text-xs font-bold text-white font-mono">
+                  <span className="text-xs font-bold text-[var(--sv-text-primary)] font-mono">
                     {entropyBits} bits
                   </span>
                 </div>
               </div>
 
               {/* Strength indicator progress scale bar */}
-              <div className="w-full bg-[#0B0C10] h-1.5 rounded-full overflow-hidden mt-3 border border-white/[0.06]">
+              <div 
+                className="w-full bg-[var(--sv-bg)] h-1.5 rounded-full overflow-hidden mt-3 border border-[var(--sv-border)]"
+                role="meter"
+                aria-valuenow={entropyBits}
+                aria-valuemin="0"
+                aria-valuemax="128"
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, (entropyBits / 128) * 100)}%` }}
@@ -166,100 +177,105 @@ export default function PasswordGeneratorPage() {
                   className={`h-full ${rating.barColor}`}
                 />
               </div>
-            </div>
+            </Card>
 
             {/* Parameter Options */}
-            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-5 shadow-xl space-y-5 backdrop-blur-md">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-heading">
+            <Card className="p-5 space-y-5 backdrop-blur-md">
+              <h3 className="text-xs font-bold text-[var(--sv-text-secondary)] uppercase tracking-wider font-sans">
                 Configuration Parameters
               </h3>
 
               {/* Length Slider */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-300 font-semibold">Password Length</span>
-                  <span className="font-mono text-blue-400 font-bold bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-md">
+                  <label htmlFor="password-length" className="text-[var(--sv-text-secondary)] font-semibold">Password Length</label>
+                  <span className="font-mono text-[var(--sv-accent)] font-bold bg-[var(--sv-accent-soft)] border border-[var(--sv-accent)]/20 px-2.5 py-0.5 rounded-md">
                     {length} characters
                   </span>
                 </div>
                 <input
+                  id="password-length"
                   type="range"
                   min="8"
                   max="64"
                   value={length}
                   onChange={(e) => setLength(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-[#0B0C10] rounded-lg appearance-none cursor-pointer accent-blue-500 border border-white/[0.08]"
+                  className="w-full h-1.5 bg-[var(--sv-bg)] rounded-lg appearance-none cursor-pointer accent-[var(--sv-accent)] border border-[var(--sv-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sv-accent)]/40"
                 />
               </div>
 
               {/* Option Toggles grid */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
+                <label htmlFor="include-upper" className="flex items-center gap-3 bg-[var(--sv-bg)] p-3 rounded-xl border border-[var(--sv-border)] cursor-pointer hover:border-[var(--sv-border-hover)] transition-colors focus-within:ring-2 focus-within:ring-[var(--sv-accent)]/40">
                   <input
+                    id="include-upper"
                     type="checkbox"
                     checked={includeUpper}
                     onChange={(e) => setIncludeUpper(e.target.checked)}
-                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded bg-[var(--sv-surface)] border-[var(--sv-border)] text-[var(--sv-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
-                    <p className="font-bold text-slate-200">Uppercase</p>
-                    <p className="text-[10px] text-slate-400 font-mono">A-Z characters</p>
+                    <p className="font-bold text-[var(--sv-text-primary)]">Uppercase</p>
+                    <p className="text-[10px] text-[var(--sv-text-muted)] font-mono">A-Z characters</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
+                <label htmlFor="include-lower" className="flex items-center gap-3 bg-[var(--sv-bg)] p-3 rounded-xl border border-[var(--sv-border)] cursor-pointer hover:border-[var(--sv-border-hover)] transition-colors focus-within:ring-2 focus-within:ring-[var(--sv-accent)]/40">
                   <input
+                    id="include-lower"
                     type="checkbox"
                     checked={includeLower}
                     onChange={(e) => setIncludeLower(e.target.checked)}
-                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded bg-[var(--sv-surface)] border-[var(--sv-border)] text-[var(--sv-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
-                    <p className="font-bold text-slate-200">Lowercase</p>
-                    <p className="text-[10px] text-slate-400 font-mono">a-z characters</p>
+                    <p className="font-bold text-[var(--sv-text-primary)]">Lowercase</p>
+                    <p className="text-[10px] text-[var(--sv-text-muted)] font-mono">a-z characters</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
+                <label htmlFor="include-numbers" className="flex items-center gap-3 bg-[var(--sv-bg)] p-3 rounded-xl border border-[var(--sv-border)] cursor-pointer hover:border-[var(--sv-border-hover)] transition-colors focus-within:ring-2 focus-within:ring-[var(--sv-accent)]/40">
                   <input
+                    id="include-numbers"
                     type="checkbox"
                     checked={includeNumbers}
                     onChange={(e) => setIncludeNumbers(e.target.checked)}
-                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded bg-[var(--sv-surface)] border-[var(--sv-border)] text-[var(--sv-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
-                    <p className="font-bold text-slate-200">Numbers</p>
-                    <p className="text-[10px] text-slate-400 font-mono">0-9 integers</p>
+                    <p className="font-bold text-[var(--sv-text-primary)]">Numbers</p>
+                    <p className="text-[10px] text-[var(--sv-text-muted)] font-mono">0-9 integers</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 bg-[#0B0C10] p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:border-white/15 transition-colors">
+                <label htmlFor="include-symbols" className="flex items-center gap-3 bg-[var(--sv-bg)] p-3 rounded-xl border border-[var(--sv-border)] cursor-pointer hover:border-[var(--sv-border-hover)] transition-colors focus-within:ring-2 focus-within:ring-[var(--sv-accent)]/40">
                   <input
+                    id="include-symbols"
                     type="checkbox"
                     checked={includeSymbols}
                     onChange={(e) => setIncludeSymbols(e.target.checked)}
-                    className="rounded bg-[#12141C] border-white/10 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded bg-[var(--sv-surface)] border-[var(--sv-border)] text-[var(--sv-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div>
-                    <p className="font-bold text-slate-200">Symbols</p>
-                    <p className="text-[10px] text-slate-400 font-mono">!@#$ specials</p>
+                    <p className="font-bold text-[var(--sv-text-primary)]">Symbols</p>
+                    <p className="text-[10px] text-[var(--sv-text-muted)] font-mono">!@#$ specials</p>
                   </div>
                 </label>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Session History Log (Right Column) */}
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-slate-400" />
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-heading">
+              <History className="w-4 h-4 text-[var(--sv-text-secondary)]" />
+              <h3 className="text-xs font-bold text-[var(--sv-text-secondary)] uppercase tracking-wider font-sans">
                 Session Log
               </h3>
             </div>
 
-            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-4.5 shadow-xl backdrop-blur-md space-y-3">
-              <p className="text-[10px] text-slate-400 leading-normal">
+            <Card className="p-4.5 backdrop-blur-md space-y-3">
+              <p className="text-[10px] text-[var(--sv-text-muted)] leading-normal">
                 History is stored in volatile browser memory during active session only.
               </p>
 
@@ -268,18 +284,18 @@ export default function PasswordGeneratorPage() {
                   history.slice(1).map((val, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between bg-[#0B0C10] border border-white/[0.06] rounded-xl p-2.5 text-xs"
+                      className="flex items-center justify-between bg-[var(--sv-bg)] border border-[var(--sv-border)] rounded-xl p-2.5 text-xs"
                     >
-                      <span className="font-mono text-slate-300 truncate pr-2 select-all">
+                      <span className="font-mono text-[var(--sv-text-primary)] truncate pr-2 select-all">
                         {val}
                       </span>
                       <button
                         onClick={() => handleCopy(val, idx)}
-                        className="text-slate-400 hover:text-white p-1 hover:bg-white/[0.08] rounded-md transition-colors shrink-0"
+                        className="text-[var(--sv-text-secondary)] hover:text-[var(--sv-text-primary)] p-1 hover:bg-[var(--sv-border-hover)] rounded-md transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sv-accent)]/40"
                         title="Copy password"
                       >
                         {copiedIndex === idx ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <Check className="w-3.5 h-3.5 text-[var(--sv-accent)]" />
                         ) : (
                           <Copy className="w-3.5 h-3.5" />
                         )}
@@ -287,10 +303,10 @@ export default function PasswordGeneratorPage() {
                     </li>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-400 py-4 text-center">No prior passwords generated.</p>
+                  <p className="text-xs text-[var(--sv-text-muted)] py-4 text-center">No prior passwords generated.</p>
                 )}
               </ul>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

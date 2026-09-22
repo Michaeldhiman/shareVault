@@ -1,39 +1,16 @@
-import React, { useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Shield, ArrowRight, Lock, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-function MagneticLink({ to, children, className, primary = false }) {
-  const ref = useRef(null);
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const x = useSpring(rawX, { stiffness: 300, damping: 20 });
-  const y = useSpring(rawY, { stiffness: 300, damping: 20 });
-
-  const handleMove = (e) => {
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
-    rawX.set((e.clientX - rect.left - rect.width / 2) * 0.3);
-    rawY.set((e.clientY - rect.top - rect.height / 2) * 0.3);
-  };
-
-  const handleLeave = () => { rawX.set(0); rawY.set(0); };
-
-  return (
-    <motion.div ref={ref} onMouseMove={handleMove} onMouseLeave={handleLeave} style={{ x, y }}>
-      <Link to={to} className={className}>{children}</Link>
-    </motion.div>
-  );
-}
+import Button from '../ui/Button';
 
 export default function FinalCTA() {
   return (
     <section
       className="section-padding relative overflow-hidden"
-      style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
+      style={{ borderTop: '1px solid var(--sv-border)' }}
       aria-labelledby="cta-heading"
     >
-      {/* Large nebula glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -45,7 +22,6 @@ export default function FinalCTA() {
         aria-hidden="true"
       />
 
-      {/* Animated ring */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         aria-hidden="true"
@@ -57,20 +33,8 @@ export default function FinalCTA() {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
       </motion.div>
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        aria-hidden="true"
-      >
-        <motion.div
-          className="w-[800px] h-[800px] rounded-full"
-          style={{ border: '1px solid rgba(94,106,210,0.04)' }}
-          animate={{ scale: [1.05, 1, 1.05], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
 
       <div className="container-xl relative z-10 text-center">
-        {/* Central vault icon */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -105,11 +69,10 @@ export default function FinalCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="font-editorial text-5xl sm:text-6xl lg:text-7xl font-semibold text-white leading-tight mb-6 max-w-3xl mx-auto"
-          style={{ letterSpacing: '-0.03em' }}
+          className="font-sans text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--sv-text-primary)] leading-tight mb-6 max-w-3xl mx-auto tracking-tight"
         >
           Your digital life<br />
-          <span className="italic text-gradient-green">deserves better.</span>
+          <span className="text-[var(--sv-accent)]">deserves better security.</span>
         </motion.h2>
 
         <motion.p
@@ -117,13 +80,12 @@ export default function FinalCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="font-display text-xl text-white/65 max-w-lg mx-auto mb-12"
+          className="font-sans text-lg sm:text-xl text-[var(--sv-text-secondary)] max-w-lg mx-auto mb-12"
         >
-          Join 500,000+ people who sleep better at night.
+          Client-side encryption. Zero-knowledge architecture.
           Start free, stay secure forever.
         </motion.p>
 
-        {/* CTA buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -131,33 +93,27 @@ export default function FinalCTA() {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
         >
-          <MagneticLink
-            to="/register"
-            primary
-            className="btn-primary text-base px-8 py-4"
-            aria-label="Create your free SecureVault account"
-          >
-            <Shield size={18} strokeWidth={2.5} />
-            Create free account
-            <ArrowRight size={16} />
-          </MagneticLink>
-
-          <MagneticLink
-            to="/login"
-            className="btn-secondary text-base px-7 py-4"
-          >
-            <Lock size={16} />
-            Sign in to vault
-          </MagneticLink>
+          <Link to="/register" aria-label="Create your free SecureVault account" className="w-full sm:w-auto">
+            <Button variant="primary" size="lg" className="w-full sm:w-auto">
+              <Shield size={17} strokeWidth={2.5} className="shrink-0" />
+              <span>Create free account</span>
+              <ArrowRight size={15} className="shrink-0" />
+            </Button>
+          </Link>
+          <Link to="/login" className="w-full sm:w-auto">
+            <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+              <Lock size={16} className="shrink-0" />
+              <span>Sign in to vault</span>
+            </Button>
+          </Link>
         </motion.div>
 
-        {/* Trust signals */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-display text-white/40"
+          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-sans text-[var(--sv-text-secondary)]"
         >
           {[
             { icon: Zap, text: 'Free forever. No credit card.' },
@@ -165,7 +121,7 @@ export default function FinalCTA() {
             { icon: Lock, text: 'Zero-knowledge architecture.' },
           ].map(({ icon: Icon, text }) => (
             <span key={text} className="flex items-center gap-2">
-              <Icon size={11} className="text-emerald-500/40" />
+              <Icon size={13} className="text-emerald-400" />
               {text}
             </span>
           ))}

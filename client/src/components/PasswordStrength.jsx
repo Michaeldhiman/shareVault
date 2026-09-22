@@ -29,12 +29,12 @@ export default function PasswordStrength({ password }) {
   const totalSegments = [0, 1, 2, 3, 4];
 
   return (
-    <div className="mt-3 p-3.5 bg-[#0B0C10] border border-white/[0.08] rounded-xl space-y-3 shadow-inner font-sans">
+    <div className="mt-3 p-3.5 bg-[var(--sv-bg)] border border-[var(--sv-border)] rounded-xl space-y-3 shadow-inner font-sans">
       {/* Strength Label and Crack Time */}
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-1.5 font-bold">
           {strength.score >= 3 ? (
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-[var(--sv-accent)]" />
           ) : (
             <ShieldAlert className={`w-4 h-4 ${strength.textColor}`} />
           )}
@@ -46,14 +46,20 @@ export default function PasswordStrength({ password }) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
-          <Clock className="w-3.5 h-3.5 text-slate-400" />
+        <div className="flex items-center gap-1 text-[11px] text-[var(--sv-text-secondary)] font-mono">
+          <Clock className="w-3.5 h-3.5 text-[var(--sv-text-secondary)]" />
           <span>Crack time: {strength.crackTime}</span>
         </div>
       </div>
 
       {/* 5-segment Strength Bar with Framer Motion spring scaling */}
-      <div className="grid grid-cols-5 gap-1.5 h-1.5">
+      <div 
+        className="grid grid-cols-5 gap-1.5 h-1.5"
+        role="meter"
+        aria-valuenow={strength.score}
+        aria-valuemin={0}
+        aria-valuemax={4}
+      >
         {totalSegments.map((index) => (
           <div
             key={index}
@@ -64,7 +70,7 @@ export default function PasswordStrength({ password }) {
               animate={{ scaleX: index <= strength.score ? 1 : 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className={`absolute inset-0 origin-left rounded-full ${
-                index <= strength.score ? strength.barColor : 'bg-transparent'
+                index <= strength.score ? (strength.score >= 3 ? 'bg-[var(--sv-accent)]' : strength.barColor) : 'bg-transparent'
               }`}
             />
           </div>
@@ -79,13 +85,13 @@ export default function PasswordStrength({ password }) {
               <span
                 className={`w-3.5 h-3.5 rounded flex items-center justify-center border transition-colors ${
                   rule.met
-                    ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                    ? 'bg-[var(--sv-accent-soft)] border-[var(--sv-accent)]/40 text-[var(--sv-accent)]'
                     : 'bg-white/[0.04] border-white/10 text-slate-500'
                 }`}
               >
                 {rule.met ? <Check className="w-2.5 h-2.5" /> : <div className="w-1 h-1 rounded-full bg-slate-500" />}
               </span>
-              <span className={rule.met ? 'text-slate-200 font-medium' : 'text-slate-400'}>
+              <span className={rule.met ? 'text-[var(--sv-text-primary)] font-medium' : 'text-[var(--sv-text-muted)]'}>
                 {rule.label}
               </span>
             </li>
@@ -95,7 +101,7 @@ export default function PasswordStrength({ password }) {
 
       {/* Suggestions / Feedback */}
       {strength.feedback.length > 0 && (
-        <div className="pt-1.5 border-t border-white/[0.06] text-[11px]">
+        <div className="pt-1.5 border-t border-[var(--sv-border)] text-[11px]">
           <ul className="space-y-1">
             {strength.feedback.map((item, idx) => (
               <li key={idx} className="flex items-start gap-1.5 text-amber-400/90 leading-tight">

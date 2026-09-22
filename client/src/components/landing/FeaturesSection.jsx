@@ -97,16 +97,15 @@ function FeatureCard({ feature, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`glass-card p-7 lg:p-8 relative overflow-hidden group flex flex-col ${isLarge ? 'md:col-span-2' : ''}`}
+      className={`p-7 lg:p-8 relative overflow-hidden group flex flex-col rounded-2xl ${isLarge ? 'md:col-span-2' : ''}`}
+      style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border)' }}
     >
-      {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 50% 40% at 0% 100%, ${feature.color}08, transparent)` }}
         aria-hidden="true"
       />
 
-      {/* Badge + icon */}
       <div className="flex items-start justify-between mb-6">
         <div
           className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -115,34 +114,21 @@ function FeatureCard({ feature, index }) {
           <Icon size={18} style={{ color: feature.color }} strokeWidth={2} aria-hidden="true" />
         </div>
         <span
-          className="text-[10px] font-display font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-          style={{
-            background: feature.colorBg,
-            border: `1px solid ${feature.colorBorder}`,
-            color: feature.color,
-          }}
+          className="text-[10px] font-sans font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
+          style={{ background: feature.colorBg, border: `1px solid ${feature.colorBorder}`, color: feature.color }}
         >
           {feature.badge}
         </span>
       </div>
 
-      {/* Content */}
-      <h3 className="font-display text-lg font-semibold text-white/90 mb-2">{feature.title}</h3>
-      <p className="font-display text-sm font-medium text-white/65 mb-3">{feature.subtitle}</p>
-      <p className="font-display text-sm text-white/55 leading-relaxed flex-1">{feature.description}</p>
+      <h3 className="font-sans text-lg font-semibold text-[var(--sv-text-primary)] mb-2">{feature.title}</h3>
+      <p className="font-sans text-sm font-medium text-[var(--sv-text-secondary)] mb-3">{feature.subtitle}</p>
+      <p className="font-sans text-sm text-[var(--sv-text-muted)] leading-relaxed flex-1">{feature.description}</p>
 
-      {/* Interactive demo element for generator card */}
       {feature.id === 'generator' && (
-        <div
-          className="mt-6 flex items-center justify-between px-3 py-2 rounded-lg"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
+        <div className="mt-6 flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <span className="font-mono text-xs text-emerald-300/70 truncate">Kx9#mP$qR2nLv!Wt</span>
-          <button
-            onClick={handleCopy}
-            className="ml-2 p-1.5 rounded-md hover:bg-white/8 transition-colors duration-150 flex-shrink-0"
-            aria-label="Copy generated password"
-          >
+          <button onClick={handleCopy} className="ml-2 p-1.5 rounded-md hover:bg-white/8 transition-colors duration-150 flex-shrink-0">
             <AnimatePresence mode="wait" initial={false}>
               {copied ? (
                 <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
@@ -158,23 +144,22 @@ function FeatureCard({ feature, index }) {
         </div>
       )}
 
-      {/* Strength bar for vault */}
       {feature.id === 'vault' && (
         <div className="mt-6 space-y-2">
           {['GitHub', 'Netflix', 'Banking', 'Email'].map((site, i) => (
             <div key={site} className="flex items-center gap-3">
-              <span className="text-[11px] font-display text-white/50 w-14 flex-shrink-0">{site}</span>
-              <div className="flex-1 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <span className="text-[11px] font-sans text-[var(--sv-text-secondary)] w-14 flex-shrink-0">{site}</span>
+              <div className="flex-1 h-1 rounded-full" style={{ background: 'var(--sv-border)' }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: `linear-gradient(90deg, #10B981, #059669)` }}
+                  style={{ background: `linear-gradient(90deg, var(--sv-accent), #059669)` }}
                   initial={{ width: 0 }}
                   whileInView={{ width: ['95%', '88%', '100%', '92%'][i] }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.5 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 />
               </div>
-              <span className="text-[11px] font-display text-emerald-400/70 w-10 text-right flex-shrink-0">
+              <span className="text-[11px] font-sans text-emerald-400/70 w-10 text-right flex-shrink-0">
                 {['95', '88', '100', '92'][i]}
               </span>
             </div>
@@ -182,7 +167,6 @@ function FeatureCard({ feature, index }) {
         </div>
       )}
 
-      {/* Device icons for sync */}
       {feature.id === 'sync' && (
         <div className="mt-6 flex items-center gap-2">
           {['💻', '📱', '🖥️', '⌚'].map((d, i) => (
@@ -196,10 +180,7 @@ function FeatureCard({ feature, index }) {
               {d}
             </motion.div>
           ))}
-          <div
-            className="ml-2 flex items-center gap-1.5 text-[11px] font-display text-emerald-400"
-            style={{ paddingLeft: '4px' }}
-          >
+          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-sans text-emerald-400" style={{ paddingLeft: '4px' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Live sync
           </div>
@@ -211,57 +192,30 @@ function FeatureCard({ feature, index }) {
 
 export default function FeaturesSection() {
   return (
-    <section
-      id="features"
-      className="section-padding relative overflow-hidden"
-      style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-      aria-labelledby="features-heading"
-    >
-      {/* Background */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] opacity-[0.03] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(94,106,210,1) 0%, transparent 60%)', filter: 'blur(80px)' }}
-        aria-hidden="true"
-      />
-
+    <section id="features" className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid var(--sv-border)' }} aria-labelledby="features-heading">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] opacity-[0.03] pointer-events-none" style={{ background: 'radial-gradient(ellipse, rgba(94,106,210,1) 0%, transparent 60%)', filter: 'blur(80px)' }} aria-hidden="true" />
       <div className="container-xl relative z-10">
-        {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="badge-green mx-auto mb-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="badge-green mx-auto mb-6 font-sans">
             <Star size={10} className="fill-emerald-400 text-emerald-400" />
             Everything you need
           </motion.div>
-
           <motion.h2
             id="features-heading"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-6"
+            className="font-sans text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--sv-text-primary)] leading-tight mb-6"
             style={{ letterSpacing: '-0.02em' }}
           >
             Everything you need.<br />
-            <span className="italic text-white/40">Nothing you don't.</span>
+            <span className="text-[var(--sv-text-secondary)]">Nothing you don't.</span>
           </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="font-display text-lg text-white/60"
-          >
+          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2, duration: 0.6 }} className="font-sans text-lg text-[var(--sv-text-secondary)]">
             Built for people who care about their security without compromising their sanity.
           </motion.p>
         </div>
-
-        {/* Feature bento grid */}
         <div className="grid md:grid-cols-3 gap-5">
           {FEATURES.map((feature, i) => (
             <FeatureCard key={feature.id} feature={feature} index={i} />

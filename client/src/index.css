@@ -4,43 +4,66 @@
 
 @layer base {
   :root {
-    /* Existing dashboard tokens */
-    --color-bg-main: #0B0C10;
-    --color-bg-card: #12141C;
-    --color-border-subtle: rgba(255, 255, 255, 0.07);
-    --color-border-hover: rgba(255, 255, 255, 0.14);
-    --color-accent-blue: #3B82F6;
-    --color-accent-emerald: #10B981;
+    /* ─── Unified SecureVault Design Tokens ─────────────────────── */
 
-    /* Landing page design tokens */
-    --vault-bg: #020203;
-    --vault-base: #050506;
-    --vault-elevated: #0a0a0c;
-    --vault-surface: rgba(255, 255, 255, 0.04);
-    --vault-border: rgba(255, 255, 255, 0.08);
-    --vault-border-hover: rgba(255, 255, 255, 0.16);
-    --vault-green: #10B981;
-    --vault-green-glow: rgba(16, 185, 129, 0.15);
-    --vault-green-mid: rgba(16, 185, 129, 0.3);
-    --vault-indigo: #5E6AD2;
-    --vault-indigo-glow: rgba(94, 106, 210, 0.15);
-    --vault-muted: #8A8F98;
-    --vault-foreground: #EDEDEF;
-    --vault-easing: cubic-bezier(0.16, 1, 0.3, 1);
-    --vault-radius: 16px;
+    /* Backgrounds */
+    --sv-bg:               #0A0B0F;
+    --sv-bg-subtle:        #0E0F14;
+    --sv-surface:          #111318;
+    --sv-surface-hover:    #161920;
+    --sv-surface-elevated: #181B23;
+
+    /* Borders */
+    --sv-border:           rgba(255, 255, 255, 0.08);
+    --sv-border-hover:     rgba(255, 255, 255, 0.14);
+    --sv-border-strong:    rgba(255, 255, 255, 0.20);
+
+    /* Text */
+    --sv-text-primary:     #EDEDEF;
+    --sv-text-secondary:   #9BA1AB;
+    --sv-text-muted:       #5C6370;
+
+    /* Brand / Primary (Emerald) */
+    --sv-accent:           #10B981;
+    --sv-accent-hover:     #059669;
+    --sv-accent-soft:      rgba(16, 185, 129, 0.12);
+    --sv-accent-border:    rgba(16, 185, 129, 0.25);
+    --sv-accent-glow:      rgba(16, 185, 129, 0.08);
+
+    /* Semantic */
+    --sv-success:          #10B981;
+    --sv-warning:          #F59E0B;
+    --sv-danger:           #EF4444;
+    --sv-info:             #3B82F6;
+
+    /* Layout */
+    --sv-radius-sm:        8px;
+    --sv-radius-md:        12px;
+    --sv-radius-lg:        16px;
+    --sv-radius-xl:        20px;
+    --sv-radius-full:      9999px;
+
+    /* Motion */
+    --sv-ease:             cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Shadows */
+    --sv-shadow-sm:        0 1px 2px rgba(0, 0, 0, 0.3);
+    --sv-shadow-md:        0 4px 12px rgba(0, 0, 0, 0.4);
+    --sv-shadow-lg:        0 8px 24px rgba(0, 0, 0, 0.5);
   }
 
   body {
-    @apply bg-[#0B0C10] text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-600/20 selection:text-emerald-200;
+    background-color: var(--sv-bg);
+    color: var(--sv-text-primary);
+    @apply min-h-screen font-sans antialiased selection:bg-emerald-600/20 selection:text-emerald-200;
   }
 
-  /* Landing page body override applied via .landing-page class */
+  /* Landing page subtle gradient overlay */
   .landing-page {
-    background-color: #020203;
+    background-color: var(--sv-bg);
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.10), transparent),
-      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(94, 106, 210, 0.07), transparent),
-      radial-gradient(ellipse 40% 30% at 20% 60%, rgba(16, 185, 129, 0.04), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.07), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(16, 185, 129, 0.03), transparent);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -50,82 +73,37 @@
 }
 
 /* ─── Custom Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.3); }
 
-/* ─── Scroll Progress Bar ───────────────────────────────────────── */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #10B981, #5E6AD2);
-  transform-origin: left;
-  z-index: 1000;
-}
-
-/* ─── Glassmorphism Utilities ───────────────────────────────────── */
-.glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.glass-strong {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
+/* ─── Glass Utilities (Landing page only) ───────────────────────── */
 .glass-card {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--vault-radius);
-  transition: border-color 0.3s var(--vault-easing), background 0.3s var(--vault-easing), box-shadow 0.3s var(--vault-easing);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-lg);
+  transition: border-color 0.3s var(--sv-ease), background 0.3s var(--sv-ease), box-shadow 0.3s var(--sv-ease);
 }
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.06);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--sv-border-hover);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* ─── Glow Effects ──────────────────────────────────────────────── */
-.glow-green {
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.2), 0 0 80px rgba(16, 185, 129, 0.06);
-}
-.glow-green-sm {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 40px rgba(16, 185, 129, 0.05);
-}
-.glow-indigo {
-  box-shadow: 0 0 40px rgba(94, 106, 210, 0.2), 0 0 80px rgba(94, 106, 210, 0.06);
-}
-.text-glow-green {
-  text-shadow: 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.2);
-}
-
-/* ─── Editorial Typography ──────────────────────────────────────── */
+/* ─── Editorial Typography (Landing hero ONLY) ──────────────────── */
 .font-editorial {
   font-family: 'Bodoni Moda', Georgia, serif;
 }
-.font-display {
-  font-family: 'Jost', Inter, sans-serif;
-}
+
+/* ─── Text Gradients ────────────────────────────────────────────── */
 .text-gradient-green {
   background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.text-gradient-mixed {
-  background: linear-gradient(135deg, #EDEDEF 0%, #10B981 50%, #5E6AD2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -137,89 +115,12 @@
   background-clip: text;
 }
 
-/* ─── Shimmer Effect ────────────────────────────────────────────── */
-.shimmer-text {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.6) 0%,
-    rgba(255,255,255,1) 30%,
-    rgba(16,185,129,0.9) 50%,
-    rgba(255,255,255,1) 70%,
-    rgba(255,255,255,0.6) 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s linear infinite;
-}
-
-/* ─── Button Styles ─────────────────────────────────────────────── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 28px;
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: white;
-  font-family: 'Jost', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.01em;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s var(--vault-easing), box-shadow 0.2s var(--vault-easing);
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25), 0 1px 3px rgba(0,0,0,0.3);
-}
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-  border-radius: inherit;
-}
-.btn-primary:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0,0,0,0.4);
-}
-.btn-primary:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 28px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.85);
-  font-family: 'Jost', sans-serif;
-  font-weight: 500;
-  font-size: 15px;
-  letter-spacing: 0.01em;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  cursor: pointer;
-  transition: all 0.2s var(--vault-easing);
-}
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  transform: translateY(-1px);
-}
-
-/* ─── Section Utilities ─────────────────────────────────────────── */
+/* ─── Section Layout ────────────────────────────────────────────── */
 .section-padding {
-  padding: 7rem 0;
+  padding: 6rem 0;
 }
 .section-padding-sm {
-  padding: 4rem 0;
+  padding: 3.5rem 0;
 }
 .container-xl {
   max-width: 1280px;
@@ -233,58 +134,98 @@
   .container-xl { padding: 0 64px; }
 }
 
-/* ─── Badge ─────────────────────────────────────────────────────── */
-.badge-green {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 9999px;
-  font-family: 'Jost', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: #34D399;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.badge-indigo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(94, 106, 210, 0.1);
-  border: 1px solid rgba(94, 106, 210, 0.25);
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #818CF8;
-  letter-spacing: 0.06em;
+/* ─── Section Divider ───────────────────────────────────────────── */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
 }
 
-/* ─── Noise Overlay ──────────────────────────────────────────────  */
+/* ─── Noise Overlay (Landing page) ──────────────────────────────── */
 .noise-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.025;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px;
 }
 
-/* ─── Vault Icon Glow ───────────────────────────────────────────── */
-.vault-ring {
-  position: relative;
+/* ─── Badge Utilities (Landing page) ────────────────────────────── */
+.badge-green {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--sv-accent-soft);
+  border: 1px solid var(--sv-accent-border);
+  border-radius: var(--sv-radius-full);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #34D399;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-.vault-ring::before {
-  content: '';
-  position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
-  animation: glow-pulse 3s ease-in-out infinite;
+
+/* ─── Landing CTA Buttons ───────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: linear-gradient(180deg, #10B981 0%, #059669 100%);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  border-radius: var(--sv-radius-md);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s var(--sv-ease);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 14px rgba(16, 185, 129, 0.2);
+}
+.btn-primary:hover {
+  background: linear-gradient(180deg, #34D399 0%, #10B981 100%);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 24px rgba(16, 185, 129, 0.35);
+  border-color: rgba(110, 231, 183, 0.4);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  border-radius: var(--sv-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s var(--sv-ease);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
 /* ─── Reduced Motion ────────────────────────────────────────────── */
@@ -296,7 +237,7 @@
   }
 }
 
-/* ─── Existing Utilities ────────────────────────────────────────── */
+/* ─── Pulse Subtle ──────────────────────────────────────────────── */
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -304,11 +245,3 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
-/* ─── Landing Section Dividers ─────────────────────────────────── */
-.section-divider {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-}
-

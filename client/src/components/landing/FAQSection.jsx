@@ -5,7 +5,7 @@ import { HelpCircle, ChevronDown, Shield } from 'lucide-react';
 const FAQS = [
   {
     q: 'What is zero-knowledge encryption?',
-    a: "Zero-knowledge means we architecturally cannot access your data. Your master password derives an encryption key locally on your device using PBKDF2 (600,000 iterations). This key encrypts your vault with AES-256-GCM before it ever leaves your browser. Our servers only receive encrypted ciphertext — we never see your passwords, and we mathematically cannot. Even our engineers with full database access couldn't read your vault.",
+    a: "Zero-knowledge means we architecturally cannot access your data. Your master password derives an encryption key locally on your device using PBKDF2 (100,000 iterations). This key encrypts your vault with AES-256-GCM before it ever leaves your browser. Our servers only receive encrypted ciphertext — we never see your passwords, and we mathematically cannot. Even our engineers with full database access couldn't read your vault.",
   },
   {
     q: 'What happens if I forget my master password?',
@@ -41,34 +41,23 @@ function FAQItem({ item, index, isOpen, onToggle }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-xl overflow-hidden"
-      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+      style={{ border: '1px solid var(--sv-border)' }}
     >
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left transition-colors duration-200"
-        style={{
-          background: isOpen ? 'rgba(16,185,129,0.04)' : 'rgba(255,255,255,0.02)',
-        }}
+        style={{ background: isOpen ? 'var(--sv-accent-soft)' : 'var(--sv-surface)' }}
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${index}`}
         id={`faq-question-${index}`}
       >
-        <span className="font-display text-sm font-semibold text-white/85 leading-snug">
+        <span className="font-sans text-sm font-semibold text-[var(--sv-text-primary)] leading-snug">
           {item.q}
         </span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-shrink-0"
-          aria-hidden="true"
-        >
-          <ChevronDown
-            size={16}
-            style={{ color: isOpen ? '#10B981' : 'rgba(255,255,255,0.3)' }}
-          />
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }} className="flex-shrink-0" aria-hidden="true">
+          <ChevronDown size={16} style={{ color: isOpen ? 'var(--sv-accent)' : 'var(--sv-text-muted)' }} />
         </motion.div>
       </button>
-
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -79,13 +68,10 @@ function FAQItem({ item, index, isOpen, onToggle }) {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            style={{ overflow: 'hidden' }}
+            style={{ overflow: 'hidden', background: 'var(--sv-surface)' }}
           >
-            <div
-              className="px-6 pb-5"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-            >
-              <p className="font-display text-sm text-white/65 leading-relaxed pt-4">
+            <div className="px-6 pb-5" style={{ borderTop: '1px solid var(--sv-border)' }}>
+              <p className="font-sans text-sm text-[var(--sv-text-secondary)] leading-relaxed pt-4">
                 {item.a}
               </p>
             </div>
@@ -100,89 +86,45 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section
-      id="faq"
-      className="section-padding relative overflow-hidden"
-      style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-      aria-labelledby="faq-heading"
-    >
-      {/* Background */}
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] opacity-[0.04] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(16,185,129,1) 0%, transparent 70%)', filter: 'blur(60px)' }}
-        aria-hidden="true"
-      />
-
+    <section id="faq" className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid var(--sv-border)' }} aria-labelledby="faq-heading">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] opacity-[0.04] pointer-events-none" style={{ background: 'radial-gradient(ellipse, rgba(16,185,129,1) 0%, transparent 70%)', filter: 'blur(60px)' }} aria-hidden="true" />
       <div className="container-xl relative z-10">
         <div className="grid lg:grid-cols-[1fr,2fr] gap-12 lg:gap-16 items-start">
-          {/* Left */}
           <div className="lg:sticky lg:top-24">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="badge-green mb-6"
-            >
-              <HelpCircle size={10} />
-              FAQ
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="badge-green mb-6 font-sans">
+              <HelpCircle size={10} /> FAQ
             </motion.div>
-
             <motion.h2
               id="faq-heading"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="font-editorial text-4xl sm:text-5xl font-semibold text-white leading-tight mb-6"
+              className="font-sans text-4xl sm:text-5xl font-bold text-[var(--sv-text-primary)] leading-tight mb-6"
               style={{ letterSpacing: '-0.02em' }}
             >
               Everything you<br />
-              <span className="italic text-white/40">were afraid to ask.</span>
+              <span className="text-[var(--sv-text-secondary)] font-normal">were afraid to ask.</span>
             </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="font-display text-sm text-white/60 leading-relaxed mb-8"
-            >
+            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="font-sans text-sm text-[var(--sv-text-secondary)] leading-relaxed mb-8">
               Security questions deserve honest, detailed answers. No marketing speak.
             </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="glass-card p-5"
-            >
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="p-5 rounded-xl" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border)' }}>
               <div className="flex items-center gap-3 mb-3">
                 <Shield size={16} className="text-emerald-400" />
-                <span className="font-display text-sm font-semibold text-white/70">Still have questions?</span>
+                <span className="font-sans text-sm font-semibold text-[var(--sv-text-primary)]">Still have questions?</span>
               </div>
-              <p className="font-display text-xs text-white/55 leading-relaxed mb-4">
+              <p className="font-sans text-xs text-[var(--sv-text-secondary)] leading-relaxed mb-4">
                 Our security team answers questions personally. No bots, no form letters.
               </p>
-              <a
-                href="mailto:security@securevault.app"
-                className="btn-secondary text-xs px-4 py-2 inline-flex"
-              >
+              <a href="mailto:security@securevault.app" className="btn-secondary text-xs px-4 py-2 inline-flex font-sans">
                 Contact security team
               </a>
             </motion.div>
           </div>
-
-          {/* Right: FAQ list */}
           <div className="space-y-3" role="list">
             {FAQS.map((item, i) => (
-              <FAQItem
-                key={i}
-                item={item}
-                index={i}
-                isOpen={openIndex === i}
-                onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
-              />
+              <FAQItem key={i} item={item} index={i} isOpen={openIndex === i} onToggle={() => setOpenIndex(openIndex === i ? -1 : i)} />
             ))}
           </div>
         </div>

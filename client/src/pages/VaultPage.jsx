@@ -10,8 +10,10 @@ import UnlockVaultModal from '../components/UnlockVaultModal';
 import VaultSkeleton from '../components/skeletons/VaultSkeleton';
 import ConfirmationDialog from '../components/ui/ConfirmationDialog';
 import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Toast from '../components/ui/Toast';
 import { CATEGORIES } from '../constants/categories';
-import { KeyRound, Search, Plus, Star, ArrowUpDown, ShieldCheck } from 'lucide-react';
+import { KeyRound, Search, Plus, Star, ArrowUpDown } from 'lucide-react';
 
 export default function VaultPage() {
   const encryptionKey = useAuthStore((state) => state.encryptionKey);
@@ -34,6 +36,12 @@ export default function VaultPage() {
   // Confirmation Dialog State
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const [toastMessage, setToastMessage] = useState(null);
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2000);
+  };
 
   const navigate = useNavigate();
 
@@ -98,17 +106,17 @@ export default function VaultPage() {
       ) : (
         <div className="space-y-6 pb-12 font-sans">
           {/* Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/[0.07] pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5" style={{ borderBottom: '1px solid var(--sv-border)' }}>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight font-heading">
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight font-sans" style={{ color: 'var(--sv-text-primary)' }}>
                   Vault Credentials
                 </h1>
-                <span className="bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                <span className="font-mono text-[11px] px-2.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'var(--sv-accent-soft)', border: '1px solid rgba(16, 185, 129, 0.2)', color: 'var(--sv-accent)' }}>
                   {items.length} {items.length === 1 ? 'Stored' : 'Stored'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--sv-text-secondary)' }}>
                 Manage, filter, and access your client-side AES-GCM 256-bit encrypted credential vault.
               </p>
             </div>
@@ -129,18 +137,20 @@ export default function VaultPage() {
           </div>
 
           {/* Control Bar: Search, Favorites Filter, Sort */}
-          <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-4 shadow-xl space-y-4 backdrop-blur-md">
+          <Card padding="p-4" className="space-y-4">
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
               {/* Search input */}
               <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                <Search className="w-4 h-4 absolute left-3.5 top-3" style={{ color: 'var(--sv-text-secondary)' }} />
                 <input
                   type="text"
                   id="vault-search"
+                  aria-label="Search vault"
                   placeholder="Search website, username, or notes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-[#0B0C10] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans"
+                  className="w-full rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all font-sans"
+                  style={{ backgroundColor: 'var(--sv-bg)', border: '1px solid var(--sv-border)', color: 'var(--sv-text-primary)' }}
                 />
               </div>
 
@@ -149,48 +159,70 @@ export default function VaultPage() {
                 <button
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border cursor-pointer ${
-                    showFavoritesOnly
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold'
-                      : 'bg-[#0B0C10] border-white/[0.08] text-slate-400 hover:text-white'
+                    showFavoritesOnly ? 'font-bold' : ''
                   }`}
+                  style={{
+                    backgroundColor: showFavoritesOnly ? 'rgba(245, 158, 11, 0.1)' : 'var(--sv-bg)',
+                    borderColor: showFavoritesOnly ? 'rgba(245, 158, 11, 0.3)' : 'var(--sv-border)',
+                    color: showFavoritesOnly ? '#FBBF24' : 'var(--sv-text-secondary)',
+                  }}
+                  onMouseEnter={(e) => !showFavoritesOnly && (e.currentTarget.style.color = 'var(--sv-text-primary)')}
+                  onMouseLeave={(e) => !showFavoritesOnly && (e.currentTarget.style.color = 'var(--sv-text-secondary)')}
                 >
-                  <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-amber-400 text-amber-400' : ''}`} />
+                  <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-[#FBBF24] text-[#FBBF24]' : ''}`} />
                   <span>Favorites Only</span>
                 </button>
 
                 {/* Sort Selector */}
-                <div className="flex items-center gap-1 bg-[#0B0C10] border border-white/[0.08] rounded-xl px-2.5 py-1.5">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                <div className="flex items-center gap-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: 'var(--sv-bg)', border: '1px solid var(--sv-border)' }}>
+                  <ArrowUpDown className="w-3.5 h-3.5" style={{ color: 'var(--sv-text-secondary)' }} />
                   <select
                     value={sortBy}
+                    aria-label="Sort credentials"
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-transparent text-xs text-slate-300 focus:outline-none cursor-pointer font-sans"
+                    className="bg-transparent text-xs focus:outline-none cursor-pointer font-sans"
+                    style={{ color: 'var(--sv-text-primary)' }}
                   >
-                    <option value="newest" className="bg-[#12141C] text-white">Newest First</option>
-                    <option value="oldest" className="bg-[#12141C] text-white">Oldest First</option>
-                    <option value="alphabetical" className="bg-[#12141C] text-white">Alphabetical (A-Z)</option>
+                    <option value="newest" style={{ backgroundColor: 'var(--sv-surface)', color: 'var(--sv-text-primary)' }}>Newest First</option>
+                    <option value="oldest" style={{ backgroundColor: 'var(--sv-surface)', color: 'var(--sv-text-primary)' }}>Oldest First</option>
+                    <option value="alphabetical" style={{ backgroundColor: 'var(--sv-surface)', color: 'var(--sv-text-primary)' }}>Alphabetical (A-Z)</option>
                   </select>
                 </div>
               </div>
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pt-3 border-t border-white/[0.06] scrollbar-none">
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-3 scrollbar-none" style={{ borderTop: '1px solid var(--sv-border)' }}>
               {['All', ...CATEGORIES].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                    category === cat
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-[#0B0C10] hover:bg-white/[0.05] border border-white/[0.08] text-slate-400 hover:text-white'
+                    category === cat ? 'shadow-sm' : ''
                   }`}
+                  style={{
+                    backgroundColor: category === cat ? 'var(--sv-accent)' : 'var(--sv-bg)',
+                    border: category === cat ? '1px solid var(--sv-accent)' : '1px solid var(--sv-border)',
+                    color: category === cat ? '#fff' : 'var(--sv-text-secondary)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (category !== cat) {
+                      e.currentTarget.style.color = 'var(--sv-text-primary)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (category !== cat) {
+                      e.currentTarget.style.color = 'var(--sv-text-secondary)';
+                      e.currentTarget.style.backgroundColor = 'var(--sv-bg)';
+                    }
+                  }}
                 >
                   {cat}
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Credentials Grid */}
           {filteredAndSortedItems.length > 0 ? (
@@ -205,30 +237,20 @@ export default function VaultPage() {
                   item={item}
                   onEdit={handleEdit}
                   onDelete={(id) => setItemToDelete(id)}
+                  onCopy={triggerToast}
                 />
               ))}
             </motion.div>
           ) : (
-            <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl py-16 px-4 text-center max-w-md mx-auto backdrop-blur-sm shadow-lg">
-              <KeyRound className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-white mb-1 font-heading">No credentials found</h3>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            <Card className="py-16 px-4 text-center max-w-md mx-auto shadow-lg">
+              <KeyRound className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--sv-text-muted)' }} />
+              <h3 className="text-base font-bold mb-1 font-sans" style={{ color: 'var(--sv-text-primary)' }}>No credentials found</h3>
+              <p className="text-xs mb-6 leading-relaxed" style={{ color: 'var(--sv-text-secondary)' }}>
                 {search || category !== 'All' || showFavoritesOnly
                   ? 'No credentials match your active search filter parameters.'
                   : 'You have not added any credentials to your SecureVault yet.'}
               </p>
-              <Button
-                variant="primary"
-                icon={Plus}
-                onClick={() => {
-                  setItemToEdit(null);
-                  setIsAddModalOpen(true);
-                }}
-                className="text-xs"
-              >
-                Add First Credential
-              </Button>
-            </div>
+            </Card>
           )}
         </div>
       )}
@@ -258,6 +280,8 @@ export default function VaultPage() {
         onConfirm={confirmDelete}
         onCancel={() => setItemToDelete(null)}
       />
+      
+      <Toast isVisible={!!toastMessage} message={toastMessage} type="success" />
     </DashboardLayout>
   );
 }

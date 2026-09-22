@@ -1,12 +1,10 @@
 import React from 'react';
 
 /**
- * Animated Pulse Skeleton Loader Component
- * Replaces generic spinners to eliminate layout shifts.
+ * Skeleton Loader Primitive
+ * Base color matches loaded content surfaces for seamless transition.
  */
 export default function Skeleton({ className = '', variant = 'text' }) {
-  const baseStyles = 'animate-pulse bg-slate-800/60 rounded-lg';
-
   const variants = {
     text: 'h-4 w-full',
     title: 'h-6 w-3/4',
@@ -15,5 +13,11 @@ export default function Skeleton({ className = '', variant = 'text' }) {
     button: 'h-10 w-28 rounded-xl',
   };
 
-  return <div className={`${baseStyles} ${variants[variant] || ''} ${className}`} />;
+  return (
+    <div
+      className={`animate-pulse rounded-lg ${variants[variant] || variants.text} ${className}`}
+      style={{ backgroundColor: 'rgba(255, 255, 255, 0.06)' }}
+      aria-hidden="true"
+    />
+  );
 }

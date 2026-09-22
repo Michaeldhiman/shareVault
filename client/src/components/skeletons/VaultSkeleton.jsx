@@ -21,7 +21,7 @@ export default function VaultSkeleton() {
       </div>
 
       {/* Control Bar Skeleton */}
-      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 space-y-4">
+      <div className="bg-[var(--sv-surface)] border border-[var(--sv-border)] rounded-2xl p-4 space-y-4">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <Skeleton className="h-10 flex-1 rounded-xl" />
           <div className="flex gap-2">
@@ -29,7 +29,7 @@ export default function VaultSkeleton() {
             <Skeleton className="h-10 w-36 rounded-xl" />
           </div>
         </div>
-        <div className="flex gap-2 pt-2 border-t border-slate-800/60 overflow-x-auto">
+        <div className="flex gap-2 pt-2 border-t border-[var(--sv-border)] overflow-x-auto">
           {[1, 2, 3, 4, 5, 6, 7].map((i) => (
             <Skeleton key={i} className="h-7 w-16 rounded-lg shrink-0" />
           ))}

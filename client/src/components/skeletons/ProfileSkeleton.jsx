@@ -18,7 +18,7 @@ export default function ProfileSkeleton() {
       </div>
 
       {/* Profile Form Card Skeleton */}
-      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 space-y-4">
+      <div className="bg-[var(--sv-surface)] border border-[var(--sv-border)] rounded-2xl p-6 space-y-4">
         <div className="space-y-2">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-10 w-full rounded-xl" />
@@ -31,7 +31,7 @@ export default function ProfileSkeleton() {
       </div>
 
       {/* Security Architecture Card Skeleton */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 space-y-3">
+      <div className="bg-[var(--sv-surface)] border border-[var(--sv-border)] rounded-2xl p-6 space-y-3">
         <Skeleton className="h-5 w-56 rounded-lg" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />

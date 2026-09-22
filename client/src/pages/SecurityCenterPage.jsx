@@ -6,9 +6,11 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import PasswordFormModal from '../components/PasswordFormModal';
 import PasswordReuseCard from '../components/PasswordReuseCard';
 import PasswordBreachCard from '../components/PasswordBreachCard';
-import UnlockVaultModal from '../components/UnlockVaultModal';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import ServiceAvatar from '../components/ui/ServiceAvatar';
 import { evaluatePasswordStrength } from '../utils/passwordStrength';
 import { detectPasswordReuse } from '../utils/passwordReuseDetector';
 import { checkPasswordBreach } from '../utils/hibpService';
@@ -23,28 +25,6 @@ import {
   ChevronUp,
   ShieldCheck
 } from 'lucide-react';
-
-const getWebsiteAvatar = (name) => {
-  const cleanName = name ? name.trim().toUpperCase() : 'W';
-  const initial = cleanName.charAt(0);
-
-  const colors = [
-    'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    'bg-rose-500/10 text-rose-400 border-rose-500/20',
-    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < cleanName.length; i++) {
-    hash = cleanName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const colorIndex = Math.abs(hash) % colors.length;
-
-  return { initial, classes: colors[colorIndex] };
-};
 
 export default function SecurityCenterPage() {
   const encryptionKey = useAuthStore((state) => state.encryptionKey);
@@ -183,35 +163,32 @@ export default function SecurityCenterPage() {
 
   return (
     <DashboardLayout>
-      {/* Session Unlock Modal */}
-      {!encryptionKey && <UnlockVaultModal />}
-
       <div className="space-y-6 pb-12 font-sans">
         {/* Title Header */}
-        <div className="border-b border-white/[0.07] pb-5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+        <div className="border-b border-[var(--sv-border)] pb-5">
+          <span className="text-[10px] font-bold text-[var(--sv-text-secondary)] uppercase tracking-widest font-mono">
             Security Watchtower
           </span>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1 font-heading">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[var(--sv-text-primary)] tracking-tight mt-1 font-sans">
             Security Audit Console
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[var(--sv-text-muted)] mt-0.5">
             Audit weak passwords, duplicate credentials, and data breaches via privacy-preserving k-Anonymity checks.
           </p>
         </div>
 
         {/* Hero Score Console */}
-        <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-6 shadow-xl relative overflow-hidden backdrop-blur-md">
+        <Card className="p-6 relative overflow-hidden backdrop-blur-md">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
             <div className="flex-1 space-y-4 text-center md:text-left">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                <span className="text-[10px] font-bold text-[var(--sv-text-secondary)] uppercase tracking-widest font-mono">
                   Live Posture Assessment
                 </span>
-                <h2 className="text-xl font-extrabold text-white tracking-tight mt-1 font-heading">
+                <h2 className="text-xl font-extrabold text-[var(--sv-text-primary)] tracking-tight mt-1 font-sans">
                   {stats.healthScore >= 80 ? 'Vault Security: Optimal' : stats.healthScore >= 50 ? 'Vault Security: Action Needed' : 'Vault Security: Risk Warning'}
                 </h2>
-                <p className="text-xs text-slate-400 mt-2 max-w-lg leading-relaxed">
+                <p className="text-xs text-[var(--sv-text-muted)] mt-2 max-w-lg leading-relaxed">
                   Your Master Password derives client keys locally. We audit password entropy and breach registries without exposing unencrypted secrets.
                 </p>
               </div>
@@ -226,20 +203,27 @@ export default function SecurityCenterPage() {
                 >
                   {isScanning ? 'Scanning Vault...' : 'Run Security Audit'}
                 </Button>
-                <span className="text-[11px] text-slate-400 font-mono">
+                <span className="text-[11px] text-[var(--sv-text-muted)] font-mono">
                   Last audit: {lastScannedTime}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-5 shrink-0 bg-[#0B0C10] border border-white/[0.08] p-4.5 rounded-2xl shadow-inner">
+            <div className="flex items-center gap-5 shrink-0 bg-[var(--sv-bg)] border border-[var(--sv-border)] p-4.5 rounded-2xl shadow-inner">
               <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
-                <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 96 96">
+                <svg 
+                  className="w-24 h-24 transform -rotate-90" 
+                  viewBox="0 0 96 96"
+                  role="meter"
+                  aria-valuenow={stats.healthScore}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
                   <circle
                     cx="48"
                     cy="48"
                     r={radius}
-                    className="stroke-white/[0.08]"
+                    className="stroke-[var(--sv-border-hover)]"
                     strokeWidth={strokeWidth}
                     fill="transparent"
                   />
@@ -249,7 +233,7 @@ export default function SecurityCenterPage() {
                     r={radius}
                     className={
                       stats.healthScore >= 80
-                        ? 'stroke-emerald-400'
+                        ? 'stroke-[var(--sv-accent)]'
                         : stats.healthScore >= 50
                         ? 'stroke-amber-400'
                         : 'stroke-rose-400'
@@ -264,53 +248,45 @@ export default function SecurityCenterPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-xl font-black text-white font-mono leading-none">{stats.healthScore}%</span>
-                  <span className="text-[9px] text-slate-400 font-mono uppercase mt-0.5">Health</span>
+                  <span className="text-xl font-black text-[var(--sv-text-primary)] font-mono leading-none">{stats.healthScore}%</span>
+                  <span className="text-[9px] text-[var(--sv-text-secondary)] font-mono uppercase mt-0.5">Health</span>
                 </div>
               </div>
 
               <div className="space-y-1.5 text-left">
-                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-bold block">Status</span>
-                <span
-                  className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded border ${
-                    stats.healthScore >= 80
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : stats.healthScore >= 50
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                      : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                  }`}
-                >
+                <span className="text-[9px] uppercase tracking-wider text-[var(--sv-text-secondary)] font-mono font-bold block">Status</span>
+                <Badge variant={stats.healthScore >= 80 ? 'success' : stats.healthScore >= 50 ? 'warning' : 'danger'}>
                   {stats.healthScore >= 80 ? 'Optimal' : stats.healthScore >= 50 ? 'Moderate' : 'Action Required'}
-                </span>
-                <div className="text-[10px] text-slate-400 font-mono mt-1">
+                </Badge>
+                <div className="text-[10px] text-[var(--sv-text-muted)] font-mono mt-1">
                   Checked {stats.total} items
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Detailed Issues Lists */}
         <div className="space-y-6">
           {/* Weak Passwords Audit Card */}
-          <div className="bg-[#12141C] border border-white/[0.07] rounded-2xl p-5 shadow-xl backdrop-blur-md">
+          <Card className="p-5 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-rose-400" />
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-heading">
+                <h3 className="text-xs font-bold text-[var(--sv-text-secondary)] uppercase tracking-wider font-sans">
                   Weak Passwords
                 </h3>
                 {weakItems.length > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono">
-                    {weakItems.length} flagged
-                  </span>
+                  <Badge variant="danger">{weakItems.length} flagged</Badge>
                 )}
               </div>
 
               {weakItems.length > 0 && (
                 <button
                   onClick={() => setIsWeakExpanded(!isWeakExpanded)}
-                  className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
+                  className="text-[var(--sv-text-secondary)] hover:text-[var(--sv-text-primary)] p-1 rounded-lg hover:bg-[var(--sv-border-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
+                  aria-expanded={isWeakExpanded}
+                  aria-controls="weak-passwords-list"
                 >
                   {isWeakExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -320,43 +296,39 @@ export default function SecurityCenterPage() {
             <AnimatePresence>
               {isWeakExpanded && weakItems.length > 0 && (
                 <motion.div
+                  id="weak-passwords-list"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden mt-4 space-y-3"
                 >
-                  <div className="border-t border-white/[0.06] pt-3">
+                  <div className="border-t border-[var(--sv-border)] pt-3">
                     <ul className="space-y-2">
                       {weakItems.map((item) => {
-                        const avatar = getWebsiteAvatar(item.website);
                         const score = evaluatePasswordStrength(item.password).score;
 
                         return (
                           <li
                             key={item.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[#0B0C10] border border-white/[0.06] rounded-xl"
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[var(--sv-bg)] border border-[var(--sv-border)] rounded-xl"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className={`w-8 h-8 rounded-lg border flex items-center justify-center font-bold text-xs shrink-0 ${avatar.classes}`}>
-                                {avatar.initial}
-                              </div>
+                              <ServiceAvatar name={item.website} className="w-8 h-8 shrink-0 text-xs" />
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-bold text-slate-200 truncate">{item.website}</span>
-                                  <span className="text-[10px] font-mono text-slate-400 truncate">{item.username}</span>
+                                  <span className="text-xs font-bold text-[var(--sv-text-primary)] truncate">{item.website}</span>
+                                  <span className="text-[10px] font-mono text-[var(--sv-text-secondary)] truncate">{item.username}</span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-[9px] text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono">
-                                    Score: {score}/4
-                                  </span>
-                                  <span className="text-[11px] text-slate-400">Weak entropy password</span>
+                                  <Badge variant="danger">Score: {score}/4</Badge>
+                                  <span className="text-[11px] text-[var(--sv-text-muted)]">Weak entropy password</span>
                                 </div>
                               </div>
                             </div>
 
                             <button
                               onClick={() => handleEdit(item)}
-                              className="text-blue-400 hover:text-blue-300 p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-colors shrink-0 align-self-end sm:align-self-center"
+                              className="text-[var(--sv-accent)] hover:text-[var(--sv-accent-hover)] p-1.5 rounded-lg bg-[var(--sv-accent-soft)] border border-[var(--sv-accent)]/20 transition-colors shrink-0 align-self-end sm:align-self-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
                               title="Update Password"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -371,15 +343,15 @@ export default function SecurityCenterPage() {
             </AnimatePresence>
 
             {weakItems.length === 0 && (
-              <div className="mt-5 flex flex-col items-center justify-center py-6 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
-                <CheckCircle2 className="w-9 h-9 text-emerald-400 mb-2" />
-                <p className="text-sm font-semibold text-emerald-300">All Passwords Strong</p>
-                <p className="text-xs text-slate-400 mt-1 max-w-xs px-4">
+              <div className="mt-5 flex flex-col items-center justify-center py-6 rounded-xl bg-[var(--sv-accent-soft)] border border-[var(--sv-accent)]/20 text-center">
+                <CheckCircle2 className="w-9 h-9 text-[var(--sv-accent)] mb-2" />
+                <p className="text-sm font-semibold text-[var(--sv-accent)]">All Passwords Strong</p>
+                <p className="text-xs text-[var(--sv-text-secondary)] mt-1 max-w-xs px-4">
                   No weak passwords found. Every stored entry meets password complexity guidelines.
                 </p>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Reused Passwords Audit Card */}
           <PasswordReuseCard
